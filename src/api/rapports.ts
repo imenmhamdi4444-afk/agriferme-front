@@ -1,5 +1,20 @@
 ﻿import API_URL from './config';
 
+export const getCultures = async () => {
+  const res = await fetch(`${API_URL}/cultures`);
+  const data = await res.json();
+  const mapped = data.map((c: any) => ({
+    id: c.id,
+    nom: c.nom,
+    dateSemis: c.dateSemis || c.date_semis || '',
+    dateRecoltePrevue: c.dateRecoltePrevue || c.date_recolte_prevue || '',
+    parcelleId: c.parcelleId ?? c.parcelle_id ?? null,
+    statut: c.statut || 'Planifiee',
+    utilisateurId: c.utilisateurId ?? c.utilisateur_id ?? 0,
+  }));
+  return { data: mapped, status: res.status };
+};
+
 export const getIndicateurs = async () => {
   const [revenusRes, stocksRes, cheptelsRes] = await Promise.all([
     fetch(`${API_URL}/revenus/stats`),

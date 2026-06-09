@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getIndicateurs, getDepenses, getRevenus } from '../api/rapports';
-import { IndicateursFinanciers, Stock, Cheptel } from '../types';
+import { getIndicateurs, getDepenses, getRevenus, getCultures } from '../api/rapports';
+import { IndicateursFinanciers, Stock, Cheptel, Culture } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { BarChart3, DollarSign, TrendingDown, TrendingUp, Calendar, PieChart as PieChartIcon, RefreshCw } from 'lucide-react';
+import { BarChart3, DollarSign, TrendingDown, TrendingUp, Calendar, PieChart as PieChartIcon, RefreshCw, Sprout, Heart, AlertTriangle, Package } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const COLORS_DEPENSES = ['#e74c3c', '#c0392b', '#e67e22', '#d35400'];
@@ -17,16 +17,18 @@ const Rapports: React.FC = () => {
   const [indicateurs, setIndicateurs] = useState<IndicateursFinanciers | null>(null);
   const [depenses, setDepenses] = useState<Stock[]>([]);
   const [revenus, setRevenus] = useState<Cheptel[]>([]);
+  const [cultures, setCultures] = useState<Culture[]>([]);
   const [annee, setAnnee] = useState(2025);
 
   useEffect(() => { load(); }, []);
 
   const load = async () => {
     try {
-      const [iRes, dRes, rRes] = await Promise.all([getIndicateurs(), getDepenses(), getRevenus()]);
+      const [iRes, dRes, rRes, cRes] = await Promise.all([getIndicateurs(), getDepenses(), getRevenus(), getCultures()]);
       setIndicateurs(iRes.data);
       setDepenses(dRes.data);
       setRevenus(rRes.data);
+      setCultures(cRes.data);
     } catch (err) { console.error(err); }
   };
 
@@ -145,6 +147,159 @@ const Rapports: React.FC = () => {
             <Bar dataKey="Dépenses (Stock)" fill="#e74c3c" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Cultures by status */}
+      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+        <div style={{
+          backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
+        }}
+          onMouseEnter={(e) => cardHover(e, true)}
+          onMouseLeave={(e) => cardHover(e, false)}>
+          <p style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Sprout size={18} /> Cultures par statut
+          </p>
+          {(() => {
+            const statusCount: Record<string, number> = {};
+            cultures.forEach((c) => {
+              statusCount[c.statut] = (statusCount[c.statut] || 0) + 1;
+            });
+            const data = Object.entries(statusCount).map(([name, value]) => ({ name, value }));
+            return data.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#7f8c8d' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#7f8c8d' }} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {data.map((_, i) => (
+                      <Cell key={i} fill={['#3498db', '#27ae60', '#f39c12', '#e74c3c', '#9b59b6'][i % 5]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <p style={{ color: '#95a5a6', textAlign: 'center', padding: 30, fontSize: 13 }}>Aucune culture</p>;
+          })()}
+        </div>
+
+        <div style={{
+          backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
+        }}
+          onMouseEnter={(e) => cardHover(e, true)}
+          onMouseLeave={(e) => cardHover(e, false)}>
+          <p style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Heart size={18} /> Santé des animaux
+          </p>
+          {(() => {
+            const healthCount: Record<string, number> = {};
+            revenus.forEach((a) => {
+              const sante = a.etatSante || 'Inconnu';
+              healthCount[sante] = (healthCount[sante] || 0) + 1;
+            });
+            const data = Object.entries(healthCount).map(([name, value]) => ({ name, value }));
+            const COLORS_HEALTH: Record<string, string> = { 'Bon': '#27ae60', 'Malade': '#e74c3c', 'Critique': '#f39c12', 'Inconnu': '#95a5a6' };
+            return data.length > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, height: 260 }}>
+                <ResponsiveContainer width="60%" height="100%">
+                  <PieChart>
+                    <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={80}>
+                      {data.map((d) => <Cell key={d.name} fill={COLORS_HEALTH[d.name] || '#95a5a6'} />)}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {data.map((d) => (
+                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#555' }}>
+                      <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: COLORS_HEALTH[d.name] || '#95a5a6' }} />
+                      {d.name}: <strong>{d.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : <p style={{ color: '#95a5a6', textAlign: 'center', padding: 30, fontSize: 13 }}>Aucun animal</p>;
+          })()}
+        </div>
+      </div>
+
+      {/* Alerts + Animals by type */}
+      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+        <div style={{
+          backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
+        }}
+          onMouseEnter={(e) => cardHover(e, true)}
+          onMouseLeave={(e) => cardHover(e, false)}>
+          <p style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <AlertTriangle size={18} /> Alertes stocks
+          </p>
+          {(() => {
+            const alerts = depenses.filter((s) => {
+              const qty = s.quantite || 0;
+              const seuil = s.seuilAlerte || 0;
+              return seuil > 0 && qty <= seuil;
+            });
+            return alerts.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {alerts.map((s) => (
+                  <div key={s.id} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '8px 12px', backgroundColor: '#fff5f5', borderRadius: 8,
+                    border: '1px solid #fde8e8',
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#c0392b' }}>{s.nomProduit}</div>
+                      <div style={{ fontSize: 11, color: '#e74c3c' }}>
+                        Stock: {s.quantite} {s.unite} / Seuil: {s.seuilAlerte} {s.unite}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 'bold', color: 'white', backgroundColor: '#e74c3c', padding: '2px 8px', borderRadius: 10 }}>
+                      Alerte
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : <p style={{ color: '#95a5a6', textAlign: 'center', padding: 20, fontSize: 13 }}>Aucune alerte stock</p>;
+          })()}
+        </div>
+
+        <div style={{
+          backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
+        }}
+          onMouseEnter={(e) => cardHover(e, true)}
+          onMouseLeave={(e) => cardHover(e, false)}>
+          <p style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Package size={18} /> Animaux par type
+          </p>
+          {(() => {
+            const typeCount: Record<string, number> = {};
+            revenus.forEach((a) => {
+              const type = a.typeAnimal || 'Inconnu';
+              typeCount[type] = (typeCount[type] || 0) + 1;
+            });
+            const data = Object.entries(typeCount).map(([name, value]) => ({ name, value }));
+            const COLORS_TYPES = ['#3498db', '#e67e22', '#9b59b6', '#1abc9c', '#f39c12', '#2c3e50'];
+            return data.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={data} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: '#7f8c8d' }} allowDecimals={false} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: '#7f8c8d' }} />
+                  <Tooltip />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={24}>
+                    {data.map((_, i) => (
+                      <Cell key={i} fill={COLORS_TYPES[i % COLORS_TYPES.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <p style={{ color: '#95a5a6', textAlign: 'center', padding: 30, fontSize: 13 }}>Aucun animal</p>;
+          })()}
+        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, alignItems: 'center' }}>
