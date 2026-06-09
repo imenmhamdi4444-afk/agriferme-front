@@ -57,7 +57,7 @@ const Rapports: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '25px 30px', maxWidth: 1300, margin: '0 auto' }}>
+    <div style={{ padding: '20px 24px', flex: 1 }}>
       <h2 style={{ color: '#2c3e50', fontSize: 28, fontWeight: 'bold', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
         <BarChart3 size={28} /> {t('rapports.title')}
       </h2>
