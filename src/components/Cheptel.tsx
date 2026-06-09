@@ -93,44 +93,50 @@ const Cheptel: React.FC = () => {
   const totalRevenus = animaux.reduce((sum, a) => sum + (a.prixTotal || 0), 0);
 
   return (
-    <div style={{ padding: '25px 30px', maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ padding: '20px 24px', flex: 1 }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .cheptel-form { flex-direction: column; }
+          .cheptel-form > div { min-width: 100% !important; }
+        }
+      `}</style>
       <h2 style={{ color: '#2c3e50', fontSize: 28, fontWeight: 'bold', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
         <Beef size={30} /> {t('cheptel.title')}
       </h2>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="cheptel-form" style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 100px', minWidth: 100 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.nom')}</label>
-          <input placeholder={t('cheptel.nom')} value={nom} onChange={(e) => setNom(e.target.value)} style={{ ...ipt, width: 120 }} />
+          <input placeholder={t('cheptel.nom')} value={nom} onChange={(e) => setNom(e.target.value)} style={{ ...ipt, width: '100%' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 100px', minWidth: 100 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.type')}</label>
-          <input placeholder={t('cheptel.type')} value={typeAnimal} onChange={(e) => setTypeAnimal(e.target.value)} style={{ ...ipt, width: 120 }} />
+          <input placeholder={t('cheptel.type')} value={typeAnimal} onChange={(e) => setTypeAnimal(e.target.value)} style={{ ...ipt, width: '100%' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 130px', minWidth: 130 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.dateNaissance')}</label>
-          <input type="date" value={dateNaissance} onChange={(e) => setDateNaissance(e.target.value)} style={{ ...ipt, width: 150 }} />
+          <input type="date" value={dateNaissance} onChange={(e) => setDateNaissance(e.target.value)} style={{ ...ipt, width: '100%' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 130px', minWidth: 130 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.etatSante')}</label>
-          <select value={etatSante} onChange={(e) => { setEtatSante(e.target.value); if (e.target.value !== 'Malade') setMaladie(''); }} style={{ ...ipt, width: 150 }}>
+          <select value={etatSante} onChange={(e) => { setEtatSante(e.target.value); if (e.target.value !== 'Malade') setMaladie(''); }} style={{ ...ipt, width: '100%' }}>
             <option value="Bon">{t('cheptel.bon')}</option><option value="Malade">{t('cheptel.malade')}</option><option value="Traitement">{t('cheptel.traitement')}</option><option value="En convalescence">{t('cheptel.convalescence')}</option>
           </select>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 120px', minWidth: 120 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.maladie')}</label>
-          <input placeholder={t('cheptel.maladie')} value={maladie} onChange={(e) => setMaladie(e.target.value)} disabled={etatSante !== 'Malade'} style={{ ...ipt, width: 140, backgroundColor: etatSante !== 'Malade' ? '#ecf0f1' : 'white' }} />
+          <input placeholder={t('cheptel.maladie')} value={maladie} onChange={(e) => setMaladie(e.target.value)} disabled={etatSante !== 'Malade'} style={{ ...ipt, width: '100%', backgroundColor: etatSante !== 'Malade' ? '#ecf0f1' : 'white' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 100px', minWidth: 100 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.qteVendue')}</label>
-          <input placeholder={t('cheptel.qteVendue')} value={quantiteVendue} onChange={(e) => setQuantiteVendue(e.target.value)} style={{ ...ipt, width: 120 }} />
+          <input placeholder={t('cheptel.qteVendue')} value={quantiteVendue} onChange={(e) => setQuantiteVendue(e.target.value)} style={{ ...ipt, width: '100%' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 110px', minWidth: 110 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.prixUnitaire')}</label>
-          <input placeholder={t('cheptel.prixUnitaire')} value={prixUnitaire} onChange={(e) => setPrixUnitaire(e.target.value)} style={{ ...ipt, width: 130 }} />
+          <input placeholder={t('cheptel.prixUnitaire')} value={prixUnitaire} onChange={(e) => setPrixUnitaire(e.target.value)} style={{ ...ipt, width: '100%' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 110px', minWidth: 110 }}>
           <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.prixTotal')}</label>
-          <input placeholder={t('cheptel.prixTotal')} value={`${prixTotalCalc.toFixed(3)} DT`} readOnly style={{ ...ipt, width: 130, backgroundColor: '#ecf0f1', fontWeight: 600, color: '#27ae60' }} />
+          <input placeholder={t('cheptel.prixTotal')} value={`${prixTotalCalc.toFixed(3)} DT`} readOnly style={{ ...ipt, width: '100%', backgroundColor: '#ecf0f1', fontWeight: 600, color: '#27ae60' }} />
         </div>
       </div>
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -269,22 +275,22 @@ const Cheptel: React.FC = () => {
               )}
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '2 1 200px', minWidth: 180 }}>
                 <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.animal')}</label>
-                <select value={rdvAnimal} onChange={(e) => setRdvAnimal(e.target.value)} style={{ ...ipt, width: 250 }}>
+                <select value={rdvAnimal} onChange={(e) => setRdvAnimal(e.target.value)} style={{ ...ipt, width: '100%' }}>
                   <option value="">Sélectionner...</option>
                   {malades.map((m, i) => <option key={m.id} value={i}>{m.nom} - {m.typeAnimal}{m.maladie ? ` (${m.maladie})` : ''}</option>)}
                 </select>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 140px', minWidth: 130 }}>
                 <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.dateRDV')}</label>
-                <input type="date" value={rdvDate} onChange={(e) => setRdvDate(e.target.value)} style={{ ...ipt, width: 170 }} />
+                <input type="date" value={rdvDate} onChange={(e) => setRdvDate(e.target.value)} style={{ ...ipt, width: '100%' }} />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '2 1 180px', minWidth: 150 }}>
                 <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.motif')}</label>
-                <input placeholder={t('cheptel.motif')} value={rdvMotif} onChange={(e) => setRdvMotif(e.target.value)} style={{ ...ipt, width: 300 }} />
+                <input placeholder={t('cheptel.motif')} value={rdvMotif} onChange={(e) => setRdvMotif(e.target.value)} style={{ ...ipt, width: '100%' }} />
               </div>
-              <button onClick={handleRdv} style={{ backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', cursor: 'pointer', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.25s' }}
+              <button onClick={handleRdv} style={{ backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', cursor: 'pointer', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.25s', whiteSpace: 'nowrap' }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#2980b9'; e.currentTarget.style.transform = 'scale(1.04)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#3498db'; e.currentTarget.style.transform = 'scale(1)'; }}>
                 <Calendar size={16} /> {t('cheptel.prendreRDV')}
