@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getIndicateurs, getDepenses, getRevenus, getCultures } from '../api/rapports';
 import { IndicateursFinanciers, Stock, Cheptel, Culture } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { BarChart3, DollarSign, TrendingDown, TrendingUp, Calendar, PieChart as PieChartIcon, RefreshCw, Sprout, Heart, AlertTriangle, Package } from 'lucide-react';
+import { BarChart3, DollarSign, TrendingDown, TrendingUp, Calendar, PieChart as PieChartIcon, RefreshCw, Sprout, Heart, Package } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const COLORS_DEPENSES = ['#e74c3c', '#c0392b', '#e67e22', '#d35400'];
@@ -150,7 +150,7 @@ const Rapports: React.FC = () => {
       </div>
 
       {/* Cultures by status */}
-      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 25, flexWrap: 'wrap', marginTop: 5 }}>
         <div style={{
           backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
@@ -225,47 +225,8 @@ const Rapports: React.FC = () => {
         </div>
       </div>
 
-      {/* Alerts + Animals by type */}
-      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-        <div style={{
-          backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
-        }}
-          onMouseEnter={(e) => cardHover(e, true)}
-          onMouseLeave={(e) => cardHover(e, false)}>
-          <p style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <AlertTriangle size={18} /> Alertes stocks
-          </p>
-          {(() => {
-            const alerts = depenses.filter((s) => {
-              const qty = s.quantite || 0;
-              const seuil = s.seuilAlerte || 0;
-              return seuil > 0 && qty <= seuil;
-            });
-            return alerts.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {alerts.map((s) => (
-                  <div key={s.id} style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '8px 12px', backgroundColor: '#fff5f5', borderRadius: 8,
-                    border: '1px solid #fde8e8',
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#c0392b' }}>{s.nomProduit}</div>
-                      <div style={{ fontSize: 11, color: '#e74c3c' }}>
-                        Stock: {s.quantite} {s.unite} / Seuil: {s.seuilAlerte} {s.unite}
-                      </div>
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 'bold', color: 'white', backgroundColor: '#e74c3c', padding: '2px 8px', borderRadius: 10 }}>
-                      Alerte
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : <p style={{ color: '#95a5a6', textAlign: 'center', padding: 20, fontSize: 13 }}>Aucune alerte stock</p>;
-          })()}
-        </div>
-
+      {/* Animals by type */}
+      <div style={{ marginTop: 5 }}>
         <div style={{
           backgroundColor: 'white', borderRadius: 10, padding: 18, flex: 1, minWidth: 300,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.3s',
