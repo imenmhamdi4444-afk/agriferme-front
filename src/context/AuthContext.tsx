@@ -5,7 +5,7 @@ import { LoginResponse } from '../types';
 interface AuthContextType {
   user: LoginResponse | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<LoginResponse>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -34,6 +34,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('user', JSON.stringify(response));
     localStorage.setItem('token', response.token);
     localStorage.setItem('uid', String(response.id));
+    return response;
   };
 
   const logout = () => {

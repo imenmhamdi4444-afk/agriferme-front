@@ -25,6 +25,10 @@ export const getStatistiquesAdmin = async () => {
       totalAgriculteurs: raw.agriculteurs,
       totalActifs: raw.actifs,
       totalBloques: raw.inactifs,
+      avecTelephone: raw.avecTelephone ?? 0,
+      sansTelephone: raw.sansTelephone ?? 0,
+      tauxActifs: raw.tauxActifs ?? 0,
+      tauxAdmins: raw.tauxAdmins ?? 0,
     },
     status: res.status,
   };

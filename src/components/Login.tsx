@@ -26,14 +26,14 @@ const Login: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
-      if (user?.role === 'ADMIN') {
+      const loggedInUser = await login(email, password);
+      if (loggedInUser.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || t('login.error'));
+      setError(err.message || t('login.error'));
     } finally {
       setLoading(false);
     }

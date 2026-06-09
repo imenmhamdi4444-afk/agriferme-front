@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { getUtilisateurs, getStatistiquesAdmin, createUtilisateur, updateUtilisateur, deleteUtilisateur, donnerAcces, bloquerAcces } from '../api/utilisateurs';
 import { Utilisateur, StatistiquesAdmin } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { Users, BarChart3, Plus, Pencil, Trash2, RefreshCw, CheckCircle, Shield, AlertCircle } from 'lucide-react';
+import { Users, BarChart3, Plus, Pencil, Trash2, RefreshCw, CheckCircle, Shield, AlertCircle, Percent, UserCheck, UserX } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const DashboardAdmin: React.FC = () => {
   const { user } = useAuth();
@@ -300,26 +301,204 @@ const DashboardAdmin: React.FC = () => {
         )}
 
         {/* Tab 2: Reports */}
-        {activeTab === 'reports' && (
-          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 15 }}>
-            <div style={{ color: '#2c3e50', fontSize: 20, fontWeight: 'bold', marginBottom: 5 }}>
-              {t('admin.userStats')}
+        {activeTab === 'reports' && stats && (
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ color: '#2c3e50', fontSize: 20, fontWeight: 'bold' }}>
+                <BarChart3 size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                {t('admin.userStats')}
+              </div>
+              <button onClick={loadData} className="btn-hover" style={{
+                backgroundColor: '#2c3e50', color: 'white', border: 'none', borderRadius: 6,
+                padding: '8px 18px', fontSize: 13, fontWeight: 'bold',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+                <RefreshCw size={14} /> {t('admin.refreshStats')}
+              </button>
             </div>
 
-            <div className="stats-wrap" style={{ display: 'flex', gap: 15 }}>
-              {renderStatVBox(<Users size={16} />, 'Utilisateurs actifs', stats?.totalActifs ?? 0, '#27ae60', 28)}
-              {renderStatVBox(<AlertCircle size={16} />, t('admin.bloques'), stats?.totalBloques ?? 0, '#e74c3c', 28)}
-              {renderStatVBox(<Shield size={16} />, 'Administrateurs', stats?.totalAdmins ?? 0, '#3498db', 28)}
-              {renderStatVBox(<Users size={16} />, t('admin.agriculteurs'), stats?.totalAgriculteurs ?? 0, '#27ae60', 28)}
+            {/* Big stat cards row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
+              {[
+                { icon: <Users size={22} />, label: 'Total', value: stats.totalUtilisateurs, color: '#2c3e50', bg: '#eef2f7' },
+                { icon: <UserCheck size={22} />, label: 'Actifs', value: stats.totalActifs, color: '#27ae60', bg: '#eafaf1' },
+                { icon: <UserX size={22} />, label: 'Bloqués', value: stats.totalBloques, color: '#e74c3c', bg: '#fdedec' },
+                { icon: <Shield size={22} />, label: 'Admins', value: stats.totalAdmins, color: '#3498db', bg: '#ebf5fb' },
+                { icon: <Users size={22} />, label: 'Agriculteurs', value: stats.totalAgriculteurs, color: '#8e44ad', bg: '#f4ecf7' },
+              ].map((card, i) => (
+                <div key={i} style={{
+                  background: card.bg, borderRadius: 12, padding: '18px 16px',
+                  display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                }}>
+                  <div style={{ color: card.color, opacity: 0.7 }}>{card.icon}</div>
+                  <div style={{ fontSize: 28, fontWeight: 'bold', color: card.color, lineHeight: 1 }}>
+                    {card.value}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#7f8c8d', fontWeight: 500 }}>{card.label}</div>
+                </div>
+              ))}
             </div>
 
-            <button onClick={loadData} className="btn-hover" style={{
-              backgroundColor: '#2c3e50', color: 'white', border: 'none', borderRadius: 5,
-              padding: '10px 24px', fontSize: 14, fontWeight: 'bold', marginTop: 5,
-              display: 'flex', alignItems: 'center', gap: 7, width: 'fit-content',
-            }}>
-              <RefreshCw size={16} /> {t('admin.refreshStats')}
-            </button>
+            {/* Charts row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div style={{
+                backgroundColor: '#fafafa', borderRadius: 12, padding: 20,
+                border: '1px solid #edf2f7', boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', marginBottom: 10 }}>
+                  <Shield size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                  Répartition par rôle
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <ResponsiveContainer width="60%" height={180}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Admins', value: stats.totalAdmins },
+                          { name: 'Agriculteurs', value: stats.totalAgriculteurs },
+                        ]}
+                        cx="50%" cy="50%" innerRadius={50} outerRadius={75}
+                        dataKey="value" startAngle={90} endAngle={-270}
+                      >
+                        <Cell fill="#3498db" />
+                        <Cell fill="#8e44ad" />
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#3498db' }} />
+                      <span style={{ fontSize: 13, color: '#555' }}>Admins ({stats.totalAdmins})</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#8e44ad' }} />
+                      <span style={{ fontSize: 13, color: '#555' }}>Agriculteurs ({stats.totalAgriculteurs})</span>
+                    </div>
+                    <div style={{ marginTop: 4, fontSize: 12, color: '#95a5a6' }}>
+                      Taux d'admin : <strong>{stats.totalUtilisateurs > 0 ? Math.round(stats.totalAdmins / stats.totalUtilisateurs * 100) : 0}%</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#fafafa', borderRadius: 12, padding: 20,
+                border: '1px solid #edf2f7', boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', marginBottom: 10 }}>
+                  <UserCheck size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                  Répartition par statut
+                </div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={[
+                    { name: 'Actifs', value: stats.totalActifs, fill: '#27ae60' },
+                    { name: 'Bloqués', value: stats.totalBloques, fill: '#e74c3c' },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#7f8c8d' }} />
+                    <YAxis tick={{ fontSize: 12, fill: '#7f8c8d' }} allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                      {[{ fill: '#27ae60' }, { fill: '#e74c3c' }].map((e, i) => (
+                        <Cell key={i} fill={e.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Bottom section: profils récents & email domains */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              {/* Derniers inscrits */}
+              <div style={{
+                backgroundColor: '#fafafa', borderRadius: 12, padding: 20,
+                border: '1px solid #edf2f7', boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', marginBottom: 14 }}>
+                  <Users size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                  Derniers inscrits
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {utilisateurs.slice(-4).reverse().map((u) => (
+                    <div key={u.id} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '8px 12px', backgroundColor: 'white', borderRadius: 8,
+                      border: '1px solid #eef1f4',
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#2c3e50' }}>{u.nomComplet}</div>
+                        <div style={{ fontSize: 11, color: '#95a5a6' }}>{u.email}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{
+                          fontSize: 10, fontWeight: 'bold', padding: '2px 8px', borderRadius: 10,
+                          color: 'white',
+                          backgroundColor: u.role === 'ADMIN' ? '#3498db' : '#8e44ad',
+                        }}>
+                          {u.role === 'ADMIN' ? 'Admin' : 'Agri'}
+                        </span>
+                        <span style={{
+                          fontSize: 10, fontWeight: 'bold', padding: '2px 8px', borderRadius: 10,
+                          color: 'white',
+                          backgroundColor: u.statut === 'ACTIF' ? '#27ae60' : '#e74c3c',
+                        }}>
+                          {u.statut}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  {utilisateurs.length === 0 && (
+                    <div style={{ fontSize: 12, color: '#95a5a6', textAlign: 'center', padding: 12 }}>
+                      Aucun utilisateur
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Fournisseurs email */}
+              <div style={{
+                backgroundColor: '#fafafa', borderRadius: 12, padding: 20,
+                border: '1px solid #edf2f7', boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 'bold', color: '#2c3e50', marginBottom: 14 }}>
+                  <Percent size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                  Répartition par domaine email
+                </div>
+                {(() => {
+                  const domainCount: Record<string, number> = {};
+                  utilisateurs.forEach((u) => {
+                    const domain = u.email.split('@')[1] || 'inconnu';
+                    domainCount[domain] = (domainCount[domain] || 0) + 1;
+                  });
+                  const domains = Object.entries(domainCount).sort((a, b) => b[1] - a[1]);
+                  const maxVal = Math.max(...domains.map(([, c]) => c), 1);
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {domains.map(([domain, count]) => (
+                        <div key={domain}>
+                          <div style={{
+                            display: 'flex', justifyContent: 'space-between',
+                            fontSize: 13, color: '#555', marginBottom: 4,
+                          }}>
+                            <span>{domain}</span>
+                            <span style={{ fontWeight: 600 }}>{count}</span>
+                          </div>
+                          <div style={{ height: 8, backgroundColor: '#ecf0f1', borderRadius: 4, overflow: 'hidden' }}>
+                            <div style={{
+                              height: '100%', width: `${(count / maxVal) * 100}%`, borderRadius: 4,
+                              background: 'linear-gradient(90deg, #3498db, #2ecc71)',
+                            }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
           </div>
         )}
       </div>

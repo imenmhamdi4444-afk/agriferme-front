@@ -117,7 +117,14 @@ export function getStatistiquesAdmin(): StatistiquesAdmin {
   const agriculteurs = users.filter((u) => u.role === 'USER').length;
   const actifs = users.filter((u) => u.statut === 'ACTIF').length;
   const bloques = users.filter((u) => u.statut === 'INACTIF').length;
-  return { totalUtilisateurs: total, totalAdmins: admins, totalAgriculteurs: agriculteurs, totalActifs: actifs, totalBloques: bloques };
+  const avecTelephone = users.filter((u) => u.telephone && u.telephone !== '').length;
+  return {
+    totalUtilisateurs: total, totalAdmins: admins, totalAgriculteurs: agriculteurs,
+    totalActifs: actifs, totalBloques: bloques,
+    avecTelephone, sansTelephone: total - avecTelephone,
+    tauxActifs: total > 0 ? Math.round((actifs / total) * 1000) / 10 : 0,
+    tauxAdmins: total > 0 ? Math.round((admins / total) * 1000) / 10 : 0,
+  };
 }
 
 export function createUtilisateur(data: any): Utilisateur {

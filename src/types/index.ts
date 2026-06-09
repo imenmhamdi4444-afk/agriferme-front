@@ -64,6 +64,10 @@ export interface StatistiquesAdmin {
   totalAgriculteurs: number;
   totalActifs: number;
   totalBloques: number;
+  avecTelephone: number;
+  sansTelephone: number;
+  tauxActifs: number;
+  tauxAdmins: number;
 }
 
 export interface StatistiquesDashboard {
