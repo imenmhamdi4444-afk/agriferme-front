@@ -101,6 +101,11 @@ const Stock: React.FC = () => {
         <button onClick={load} style={btn('#2c3e50')} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1a252f')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2c3e50')}><RefreshCw size={14} /> {t('admin.actualiser')}</button>
         {editingId && <button onClick={resetForm} style={{ ...btn('#95a5a6'), fontSize: 11 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#7f8c8d')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#95a5a6')}>{t('admin.annuler')}</button>}
       </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <SearchBar value={search} onChange={v => { setSearch(v); setPage(1); }} placeholder='Rechercher un produit...' />
+        <span style={{ fontSize: 13, color: '#7f8c8d' }}>{filtered.length} produit(s)</span>
+      </div>
+      <Pagination currentPage={page} totalItems={filtered.length} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setPage} />
       <div style={{ backgroundColor: 'white', borderRadius: 8, overflow: 'auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', maxHeight: 380 }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>

@@ -148,6 +148,11 @@ const Cultures: React.FC = () => {
           <RefreshCw size={16} />
         </button>
       </form>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <SearchBar value={search} onChange={v => { setSearch(v); setPage(1); }} placeholder='Rechercher une culture...' />
+        <span style={{ fontSize: 13, color: '#7f8c8d' }}>{filtered.length} culture(s)</span>
+      </div>
+      <Pagination currentPage={page} totalItems={filtered.length} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setPage} />
       <div style={{ backgroundColor: 'white', borderRadius: 8, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>

@@ -172,6 +172,11 @@ const Cheptel: React.FC = () => {
           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#7f8c8d'; e.currentTarget.style.transform = 'scale(1.04)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#95a5a6'; e.currentTarget.style.transform = 'scale(1)'; }}>{t('cheptel.annuler')}</button>}
       </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <SearchBar value={search} onChange={v => { setSearch(v); setPage(1); }} placeholder='Rechercher un animal...' />
+        <span style={{ fontSize: 13, color: '#7f8c8d' }}>{filtered.length} animal(aux)</span>
+      </div>
+      <Pagination currentPage={page} totalItems={filtered.length} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setPage} />
       <div style={{ backgroundColor: 'white', borderRadius: 10, overflow: 'auto', marginBottom: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', maxHeight: 380, transition: 'box-shadow 0.3s' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
           <thead>
