@@ -1,14 +1,16 @@
 ﻿import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getDashboard, getAllRevenus } from '../api/rapports';
-import { StatistiquesDashboard, RevenuDTO } from '../types';
+import { StatistiquesDashboard, RevenuDTO, Cheptel as CheptelType } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { Sprout, Wheat, PawPrint, AlertTriangle, DollarSign, RefreshCw, Package } from 'lucide-react';
+import { Sprout, Wheat, PawPrint, AlertTriangle, DollarSign, RefreshCw, Package, Calendar } from 'lucide-react';
 
 const DashboardUser: React.FC = () => {
   const { user } = useAuth();
   const [dashboard, setDashboard] = useState<StatistiquesDashboard | null>(null);
   const [revenus, setRevenus] = useState<RevenuDTO[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadData();
@@ -30,6 +32,8 @@ const DashboardUser: React.FC = () => {
     alerteMessages.push(`${dashboard.nbAlertes} stock(s) bas`);
   }
   const hasAlertes = alerteMessages.length > 0;
+  const maladesList = dashboard?.malades ?? [];
+  const hasMalades = maladesList.length > 0;
 
   const { t } = useTranslation();
 
@@ -132,8 +136,43 @@ const DashboardUser: React.FC = () => {
           {t('user.alertesImportantes')}
         </div>
         <div style={styles.alerteText}>
-          {hasAlertes ? alerteMessages.join('\n') : 'Aucune alerte pour le moment'}
+          {hasAlertes ? alerteMessages.join('\n') : ''}
         </div>
+        {hasMalades && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#c0392b', marginBottom: 6 }}>
+              Animaux malades ({maladesList.length})
+            </div>
+            <div style={{ maxHeight: 140, overflowY: 'auto', border: '1px solid #e74c3c', borderRadius: 4, backgroundColor: 'white' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#fdebd0', borderBottom: '1px solid #e74c3c' }}>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600, color: '#c0392b', width: 120 }}>Nom</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600, color: '#c0392b', width: 90 }}>Type</th>
+                    <th style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600, color: '#c0392b' }}>Maladie</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {maladesList.map((m) => (
+                    <tr key={m.id} style={{ borderBottom: '1px solid #fdebd0' }}>
+                      <td style={{ padding: '4px 8px', fontWeight: 500 }}>{m.nom}</td>
+                      <td style={{ padding: '4px 8px' }}>{m.typeAnimal}</td>
+                      <td style={{ padding: '4px 8px', color: '#e74c3c' }}>{m.maladie || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <button onClick={() => navigate('/cheptel', { state: { openRdv: true } })} style={{ backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: 4, padding: '7px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <Calendar size={14} /> Prendre RDV vétérinaire →
+              </button>
+            </div>
+          </div>
+        )}
+        {!hasAlertes && !hasMalades && (
+          <div style={styles.alerteText}>Aucune alerte pour le moment</div>
+        )}
       </div>
 
       <div style={styles.revenuCard}>

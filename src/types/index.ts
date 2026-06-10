@@ -79,6 +79,7 @@ export interface StatistiquesDashboard {
   totalRevenus: number;
   revenusStock: number;
   revenusCheptel: number;
+  malades?: Cheptel[];
 }
 
 export interface IndicateursFinanciers {
