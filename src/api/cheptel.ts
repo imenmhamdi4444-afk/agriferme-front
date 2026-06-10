@@ -1,4 +1,5 @@
-﻿import API_URL, { getAuthHeaders } from './config';
+﻿import { envoyerEmailRDV } from './emailjs';
+import API_URL, { getAuthHeaders } from './config';
 
 const mapCheptel = (c: any) => ({
   id: c.id, nom: c.nom,
@@ -47,7 +48,19 @@ export const deleteCheptel = async (id: number) => {
 
 export const prendreRdv = async (rdvData: any) => {
   const id = typeof rdvData === 'number' ? rdvData : rdvData.animalId;
-  const res = await fetch(`${API_URL}/cheptels/${id}`, {
+  // Send email notification
+  try {
+    await envoyerEmailRDV({
+      animal_nom: rdvData.animalNom || 'Animal',
+      type_animal: rdvData.typeAnimal || '',
+      maladie: rdvData.motif || '',
+      date_rdv: rdvData.dateRdv || '',
+      motif: rdvData.motif || '',
+    });
+  } catch (emailErr) {
+    console.error('Email error:', emailErr);
+  }
+  const res = await fetch(API_URL + '/cheptels/' + id, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ etatSante: 'Critique' }),
   });
   return { data: await res.json(), status: res.status };
