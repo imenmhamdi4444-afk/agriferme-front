@@ -1,3 +1,8 @@
+﻿import Toast from './Toast';
+import SearchBar from './SearchBar';
+import Pagination from './Pagination';
+import Spinner from './Spinner';
+import { useToast } from '../hooks/useToast';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +26,11 @@ const Cheptel: React.FC = () => {
   const [prixUnitaire, setPrixUnitaire] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showMalades, setShowMalades] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+  const { toast, showToast, hideToast } = useToast();
   const [rdvAnimal, setRdvAnimal] = useState('');
   const [rdvDate, setRdvDate] = useState('');
   const [rdvMotif, setRdvMotif] = useState('');
@@ -28,11 +38,12 @@ const Cheptel: React.FC = () => {
   useEffect(() => { load(); }, []);
 
   const load = async () => {
+    setLoading(true);
     try {
       const [aRes, mRes] = await Promise.all([getCheptel(), getAnimauxMalades()]);
       setAnimaux(aRes.data);
       setMalades(mRes.data);
-    } catch (err) { console.error(err); }
+    } catch (err) { showToast('Erreur de chargement', 'error'); } finally { setLoading(false); }
   };
 
   const qty = parseFloat(quantiteVendue) || 0;
@@ -45,12 +56,15 @@ const Cheptel: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!nom.trim()) { showToast('Le nom est requis', 'warning'); return; }
+    if (!typeAnimal.trim()) { showToast('Le type animal est requis', 'warning'); return; }
     try {
       const data = { nom, typeAnimal, dateNaissance, etatSante, maladie: etatSante === 'Malade' ? maladie : '', quantiteVendue: qty, prixUnitaire: pu, prixTotal: qty * pu };
       if (editingId) { await updateCheptel(editingId, data); }
       else { await createCheptel(data); }
       resetForm(); load();
-    } catch (err) { console.error(err); }
+      showToast(editingId ? 'Animal modifie !' : 'Animal ajoute !', 'success');
+    } catch (err) { showToast('Erreur lors de la sauvegarde', 'error'); }
   };
 
   const handleEdit = (a: CheptelType) => {
@@ -86,6 +100,9 @@ const Cheptel: React.FC = () => {
     cursor: 'pointer', fontSize: 14, fontWeight: 600, transition: 'all 0.25s',
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
   });
+
+  const filtered = animaux.filter(a => a.nom?.toLowerCase().includes(search.toLowerCase()) || a.typeAnimal?.toLowerCase().includes(search.toLowerCase()));
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const totalAnimaux = animaux.length;
   const enBonneSante = animaux.filter((a) => a.etatSante === 'Bon').length;
@@ -160,6 +177,11 @@ const Cheptel: React.FC = () => {
           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#7f8c8d'; e.currentTarget.style.transform = 'scale(1.04)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#95a5a6'; e.currentTarget.style.transform = 'scale(1)'; }}>{t('cheptel.annuler')}</button>}
       </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <SearchBar value={search} onChange={v => { setSearch(v); setPage(1); }} placeholder='Rechercher un animal...' />
+        <span style={{ fontSize: 13, color: '#7f8c8d' }}>{filtered.length} animal(aux)</span>
+      </div>
+      <Pagination currentPage={page} totalItems={filtered.length} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setPage} />
       <div style={{ backgroundColor: 'white', borderRadius: 10, overflow: 'auto', marginBottom: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', maxHeight: 380, transition: 'box-shadow 0.3s' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
           <thead>
@@ -177,7 +199,7 @@ const Cheptel: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {animaux.map((a) => (
+            {paginated.map((a) => (
               <tr key={a.id} onClick={() => handleEdit(a)} style={{ borderBottom: '1px solid #ecf0f1', cursor: 'pointer', transition: 'background 0.15s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f4f8')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
@@ -202,7 +224,7 @@ const Cheptel: React.FC = () => {
                 </td>
               </tr>
             ))}
-            {animaux.length === 0 && (
+            {filtered.length === 0 && (
               <tr><td colSpan={10} style={{ padding: 30, textAlign: 'center', color: '#95a5a6', fontSize: 15 }}>{t('cheptel.empty')}</td></tr>
             )}
           </tbody>

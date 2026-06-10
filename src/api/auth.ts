@@ -15,11 +15,9 @@ export const login = async (email: string, motDePasse: string): Promise<LoginRes
 
   const data = await res.json();
 
-  // AuthContext expects a token field - generate a simple session token
-  const sessionToken = btoa(`${data.id}:${data.email}:${Date.now()}`);
-
+  // Use the real JWT token from the server
   const loginResponse: LoginResponse = {
-    token: sessionToken,
+    token: data.token,
     type: 'Bearer',
     id: data.id,
     email: data.email,
@@ -30,7 +28,7 @@ export const login = async (email: string, motDePasse: string): Promise<LoginRes
 
   localStorage.setItem('uid', String(loginResponse.id));
   localStorage.setItem('user', JSON.stringify(loginResponse));
-  localStorage.setItem('token', sessionToken);
+  localStorage.setItem('token', data.token);
 
   return loginResponse;
 };
