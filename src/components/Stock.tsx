@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
+import Toast from './Toast';
+import SearchBar from './SearchBar';
+import Pagination from './Pagination';
+import Spinner from './Spinner';
+import { useToast } from '../hooks/useToast';
 import { getStock, createStock, updateStock, deleteStock } from '../api/stock';
 import { Stock as StockItem } from '../types';
 import { Package, Plus, Pencil, Trash2, RefreshCw, DollarSign, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -14,14 +19,20 @@ const Stock: React.FC = () => {
   const [prixUnitaire, setPrixUnitaire] = useState('');
   const [depense, setDepense] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => { load(); }, []);
 
   const load = async () => {
+    setLoading(true);
     try {
       const res = await getStock();
       setStocks(res.data);
-    } catch (err) { console.error(err); }
+    } catch (err) { showToast('Erreur lors du chargement', 'error'); } finally { setLoading(false); }
   };
 
   const qty = parseFloat(quantite) || 0;
@@ -31,6 +42,9 @@ const Stock: React.FC = () => {
   const resetForm = () => { setNomProduit(''); setQuantite(''); setUnite('kg'); setSeuilAlerte(''); setPrixUnitaire(''); setDepense(''); setEditingId(null); };
 
   const handleSubmit = async () => {
+    if (!nomProduit.trim()) { showToast('Le nom du produit est requis', 'warning'); return; }
+    if (!quantite || parseFloat(quantite) < 0) { showToast('La quantite doit etre positive', 'warning'); return; }
+    if (!unite.trim()) { showToast('L unite est requise', 'warning'); return; }
     try {
       const data = {
         nomProduit, quantite: qty, unite, seuilAlerte: parseFloat(seuilAlerte) || 10,
@@ -38,8 +52,8 @@ const Stock: React.FC = () => {
       };
       if (editingId) { await updateStock(editingId, data); }
       else { await createStock(data); }
-      resetForm(); load();
-    } catch (err) { console.error(err); }
+      resetForm(); load(); showToast(editingId ? 'Stock modifie !' : 'Stock ajoute !', 'success');
+    } catch (err) { showToast('Erreur lors de la sauvegarde', 'error'); }
   };
 
   const handleEdit = (s: StockItem) => {
@@ -56,6 +70,9 @@ const Stock: React.FC = () => {
   const valeurTotale = stocks.reduce((sum, s) => sum + (s.quantite || 0) * (s.prixUnitaire || 0), 0);
   const totalDepenses = stocks.reduce((sum, s) => sum + (s.depense || 0), 0);
   const nbAlertes = stocks.filter((s) => (s.quantite || 0) <= (s.seuilAlerte || 0)).length;
+
+  const filtered = stocks.filter(s => s.nomProduit?.toLowerCase().includes(search.toLowerCase()));
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const ipt: React.CSSProperties = { padding: '6px 10px', borderRadius: 5, border: '1px solid #bdc3c7', fontSize: 13, backgroundColor: 'white', outline: 'none' };
   const btn = (bg: string): React.CSSProperties => ({
@@ -100,7 +117,7 @@ const Stock: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {stocks.map((s) => (
+            {paginated.map((s) => (
               <tr key={s.id} onClick={() => handleEdit(s)} style={{ borderBottom: '1px solid #dee2e6', cursor: 'pointer', transition: 'background .15s' }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
                 <td style={{ padding: '6px 8px' }}>{s.id}</td>
                 <td style={{ padding: '6px 8px' }}>{s.nomProduit}</td>
@@ -152,7 +169,7 @@ const Stock: React.FC = () => {
           <span style={{ fontSize: 18, color: '#2c3e50', fontWeight: 'bold' }}>{stocks.length}</span>
         </div>
       </div>
-    </div>
+  </div>
   );
 };
 

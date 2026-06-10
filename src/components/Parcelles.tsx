@@ -1,4 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import Toast from './Toast';
+import SearchBar from './SearchBar';
+import Pagination from './Pagination';
+import { useToast } from '../hooks/useToast';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getParcelles, createParcelle, updateParcelle, deleteParcelle } from '../api/parcelles';
 import { Parcelle } from '../types';
@@ -11,6 +15,11 @@ const Parcelles: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [parcelles, setParcelles] = useState<Parcelle[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+  const { toast, showToast, hideToast } = useToast();
   const [nom, setNom] = useState('');
   const [surface, setSurface] = useState('');
   const [localisation, setLocalisation] = useState('');
@@ -20,10 +29,11 @@ const Parcelles: React.FC = () => {
   useEffect(() => { load(); }, []);
 
   const load = async () => {
+    setLoading(true);
     try {
       const res = await getParcelles();
       setParcelles(res.data);
-    } catch (err) { console.error(err); }
+    } catch (err) { showToast('Erreur de chargement', 'error'); } finally { setLoading(false); }
   };
 
   const resetForm = () => { setNom(''); setSurface(''); setLocalisation(''); setCulture(''); setEditingId(null); };
@@ -38,6 +48,7 @@ const Parcelles: React.FC = () => {
       }
       resetForm();
       load();
+      showToast(editingId ? 'Parcelle modifiee !' : 'Parcelle ajoutee !', 'success');
     } catch (err) { console.error(err); }
   };
 
@@ -55,6 +66,12 @@ const Parcelles: React.FC = () => {
       load();
     }
   };
+
+  const filtered = parcelles.filter(p =>
+    p.nom?.toLowerCase().includes(search.toLowerCase()) ||
+    p.localisation?.toLowerCase().includes(search.toLowerCase())
+  );
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const ipt = { padding: '8px 12px', borderRadius: 5, border: '1.5px solid #bdc3c7', fontSize: 13, color: '#2c3e50', backgroundColor: 'white', outline: 'none', transition: 'all 0.3s ease', boxSizing: 'border-box' as const, height: 38 };
   const btn = (bg: string, hover: string): React.CSSProperties => ({ backgroundColor: bg, color: 'white', border: 'none', borderRadius: 5, padding: '6px 14px', cursor: 'pointer', fontSize: 14, fontWeight: 600, transition: 'all 0.3s ease', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 38, minWidth: 38 });
@@ -84,7 +101,7 @@ const Parcelles: React.FC = () => {
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#27ae60'; e.currentTarget.style.transform = 'scale(1)'; }}>
           {editingId ? <Pencil size={16} /> : <Plus size={18} />}
         </button>
-        <button type="button" onClick={() => { if (editingId) handleSubmit({ preventDefault: () => {} } as any); }} style={btn('#3498db', '#2980b9')}
+        <button type="button" onClick={handleSubmit} style={btn('#3498db', '#2980b9')}
           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#2980b9'; e.currentTarget.style.transform = 'scale(1.05)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#3498db'; e.currentTarget.style.transform = 'scale(1)'; }}>
           <Pencil size={16} />
@@ -112,7 +129,7 @@ const Parcelles: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {parcelles.map((p) => (
+            {paginated.map((p) => (
               <tr key={p.id} onClick={() => handleEdit(p)}
                 style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
@@ -124,7 +141,7 @@ const Parcelles: React.FC = () => {
                 <td style={td}>{p.cultureActuelle}</td>
               </tr>
             ))}
-            {parcelles.length === 0 && (
+            {filtered.length === 0 && (
               <tr><td colSpan={5} style={{ ...td, textAlign: 'center', color: '#95a5a6', padding: 30 }}>{t('parcelles.empty')}</td></tr>
             )}
           </tbody>

@@ -1,4 +1,4 @@
-export interface Utilisateur {
+﻿export interface Utilisateur {
   id: number;
   nomComplet: string;
   email: string;
@@ -22,6 +22,7 @@ export interface Culture {
   dateSemis: string;
   dateRecoltePrevue: string;
   parcelleId: number | null;
+  parcelleNom?: string;
   statut: string;
   utilisateurId: number;
 }

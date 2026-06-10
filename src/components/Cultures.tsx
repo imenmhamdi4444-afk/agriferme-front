@@ -1,4 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
+import Toast from './Toast';
+import SearchBar from './SearchBar';
+import Pagination from './Pagination';
+import Spinner from './Spinner';
+import { useToast } from '../hooks/useToast';
 import { useNavigate } from 'react-router-dom';
 import { getCultures, createCulture, updateCulture, deleteCulture } from '../api/cultures';
 import { getParcelles } from '../api/parcelles';
@@ -27,21 +32,28 @@ const Cultures: React.FC = () => {
   const [parcelleId, setParcelleId] = useState<number | string>('');
   const [statut, setStatut] = useState('PlanifiÃ©e');
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => { load(); }, []);
 
   const load = async () => {
+    setLoading(true);
     try {
       const [cRes, pRes] = await Promise.all([getCultures(), getParcelles()]);
       setCultures(cRes.data);
       setParcelles(pRes.data);
-    } catch (err) { console.error(err); }
+    } catch (err) { showToast('Erreur lors du chargement', 'error'); } finally { setLoading(false); }
   };
 
   const resetForm = () => { setNom(''); setDateSemis(''); setDateRecolte(''); setParcelleId(''); setStatut('PlanifiÃ©e'); setEditingId(null); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nom.trim()) { showToast('Le nom de la culture est requis', 'warning'); return; }
     try {
       const data = { nom, dateSemis, dateRecoltePrevue: dateRecolte, parcelleId: parcelleId ? Number(parcelleId) : null, statut };
       if (editingId) {
@@ -51,7 +63,8 @@ const Cultures: React.FC = () => {
       }
       resetForm();
       load();
-    } catch (err) { console.error(err); }
+      showToast(editingId ? 'Culture modifiee !' : 'Culture ajoutee !', 'success');
+    } catch (err) { showToast('Erreur lors de la sauvegarde', 'error'); }
   };
 
   const handleEdit = (c: Culture) => {
@@ -78,6 +91,9 @@ const Cultures: React.FC = () => {
       default: return '#95a5a6';
     }
   };
+
+  const filtered = cultures.filter(c => c.nom?.toLowerCase().includes(search.toLowerCase()) || c.parcelleNom?.toLowerCase().includes(search.toLowerCase()));
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const ipt = { padding: '8px 12px', borderRadius: 5, border: '1.5px solid #bdc3c7', fontSize: 13, color: '#2c3e50', backgroundColor: 'white', outline: 'none', transition: 'all 0.3s ease', boxSizing: 'border-box' as const, height: 38 };
   const sel = { padding: '8px 12px', borderRadius: 5, border: '1.5px solid #bdc3c7', fontSize: 13, color: '#2c3e50', backgroundColor: 'white', outline: 'none', transition: 'all 0.3s ease', boxSizing: 'border-box' as const, height: 38, cursor: 'pointer' as const };
@@ -145,7 +161,7 @@ const Cultures: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {cultures.map((c) => (
+            {paginated.map((c) => (
               <tr key={c.id} onClick={() => handleEdit(c)}
                 style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
@@ -158,13 +174,13 @@ const Cultures: React.FC = () => {
                 <td style={td}><span style={{ backgroundColor: getStatutColor(c.statut) + '20', color: getStatutColor(c.statut), padding: '3px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, display: 'inline-block' }}>{t(statutLabels[c.statut] || c.statut)}</span></td>
               </tr>
             ))}
-            {cultures.length === 0 && (
+            {filtered.length === 0 && (
               <tr><td colSpan={6} style={{ ...td, textAlign: 'center', color: '#95a5a6', padding: 30 }}>{t('cultures.empty')}</td></tr>
             )}
           </tbody>
         </table>
       </div>
-    </div>
+  </div>
   );
 };
 
