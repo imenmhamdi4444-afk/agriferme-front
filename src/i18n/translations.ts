@@ -449,7 +449,7 @@ const ar: TranslationMap = {
   'stock.sacs': 'كيس',
   'stock.bottes': 'ربطات',
   'stock.ok': 'صحيح',
-  'stock.stockBas': 'المخزون شحّ',
+  'stock.stockBas': 'مخزون منخفض',
   'stock.valeurTotale': 'القيمة الجملية',
   'stock.totalDepenses': 'مجموع المصاريف',
   'stock.alertes': 'تنبيهات',
