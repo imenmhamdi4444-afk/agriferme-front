@@ -1,8 +1,8 @@
 import emailjs from '@emailjs/browser';
 
-const SERVICE_ID = 'service_xxxxxxx';
-const TEMPLATE_ID = 'template_xxxxxxx';
-const PUBLIC_KEY = 'xxxxxxxxxxxxxx';
+const SERVICE_ID = 'service_krvehgw';
+const TEMPLATE_ID = 'template_dwjfbti';
+const PUBLIC_KEY = 'gYBFUm-y9FXj8xi4t';
 
 export const sendRdvEmail = async (data: {
   animalNom: string;

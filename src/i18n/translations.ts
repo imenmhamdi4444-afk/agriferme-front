@@ -160,6 +160,7 @@ const fr: TranslationMap = {
   'cheptel.empty': 'Aucun animal trouvé',
   'cheptel.confirmDelete': 'Supprimer cet animal ?',
   'cheptel.rdvSuccess': 'RDV vétérinaire demandé !',
+  'cheptel.selectPlaceholder': 'Sélectionner...',
   'cheptel.selectAnimalDate': 'Sélectionnez un animal et une date',
 
   'rapports.title': 'Tableau de Bord Financier',
@@ -328,6 +329,7 @@ const en: TranslationMap = {
   'cheptel.empty': 'No animals found',
   'cheptel.confirmDelete': 'Delete this animal?',
   'cheptel.rdvSuccess': 'Vet appointment requested!',
+  'cheptel.selectPlaceholder': 'Select...',
   'cheptel.selectAnimalDate': 'Select an animal and a date',
 
   'rapports.title': 'Financial Dashboard',
@@ -496,6 +498,7 @@ const ar: TranslationMap = {
   'cheptel.empty': 'ما لقيناش حيوانات',
   'cheptel.confirmDelete': 'تحب تحذف هاذ الحيوان؟',
   'cheptel.rdvSuccess': 'تم طلب موعد البيطري!',
+  'cheptel.selectPlaceholder': 'ختار...',
   'cheptel.selectAnimalDate': 'ختار حيوان وتاريخ',
 
   'rapports.title': 'لوبة المال',

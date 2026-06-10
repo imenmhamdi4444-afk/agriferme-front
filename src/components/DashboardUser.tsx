@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getDashboard, getAllRevenus } from '../api/rapports';
 import { StatistiquesDashboard, RevenuDTO, Cheptel as CheptelType } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { Sprout, Wheat, PawPrint, AlertTriangle, DollarSign, RefreshCw, Package, Calendar } from 'lucide-react';
+import { Sprout, Wheat, PawPrint, AlertTriangle, RefreshCw, Package, Calendar } from 'lucide-react';
 
 const DashboardUser: React.FC = () => {
   const { user } = useAuth();
@@ -122,7 +122,7 @@ const DashboardUser: React.FC = () => {
           onMouseEnter={() => setHoveredCard('revenus')}
           onMouseLeave={() => setHoveredCard(null)}
         >
-          <DollarSign size={30} color="#27ae60" />
+          <span style={{ fontWeight:'bold', fontSize:22, color:'#27ae60' }}>DT</span>
           <span style={styles.cardLabel}>{t('user.totalRevenus')}</span>
           <span style={{ fontSize: 18, fontWeight: 'bold', color: '#27ae60', margin: 0 }}>
             {(dashboard?.totalRevenus ?? 0).toFixed(3)} DT
@@ -177,7 +177,7 @@ const DashboardUser: React.FC = () => {
 
       <div style={styles.revenuCard}>
         <div style={styles.revenuTitle}>
-          <DollarSign size={16} style={{ verticalAlign: 'middle', marginRight: 5 }} />
+          <span style={{ fontWeight:'bold', fontSize:13, verticalAlign:'middle', marginRight:5 }}>DT</span>
           {t('user.listeRevenus')}
         </div>
 
