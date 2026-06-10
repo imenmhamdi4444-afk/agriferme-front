@@ -395,7 +395,7 @@ const ar: TranslationMap = {
   'admin.statut': 'الحالة',
   'admin.actions': 'الإجراءات',
 
-  'user.welcome': 'مرحبا',
+  'user.welcome': 'عسلاما',
   'user.parcelles': 'الأراضي',
   'user.cultures': 'المحاصيل',
   'user.animaux': 'الحيوانات',
