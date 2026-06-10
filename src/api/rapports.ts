@@ -54,11 +54,12 @@ export const getDashboard = async () => {
   const cheptels = await cheptelsRes.json();
   const stocks = await stocksRes.json();
   const revenusStats = await revenusRes.json();
-  const nbAlertes = stocks.filter((s: any) => { const qty = parseFloat(s.quantite) || 0; const seuil = parseFloat(s.seuil_alerte || s.seuilAlerte) || 0; return qty <= seuil; }).length + cheptels.filter((c: any) => (c.etat_sante || c.etatSante) === 'Malade').length;
+  const malades = Array.isArray(cheptels) ? cheptels.filter((c: any) => (c.etat_sante || c.etatSante) === 'Malade' || (c.etat_sante || c.etatSante) === 'Critique').map((c: any) => ({ id: c.id, nom: c.nom, typeAnimal: c.typeAnimal || c.type_animal || '', etatSante: c.etatSante || c.etat_sante || 'Bon', maladie: c.maladie || '', quantiteVendue: c.quantiteVendue ?? c.quantite_vendue ?? 0, prixUnitaire: c.prixUnitaire ?? c.prix_unitaire ?? 0, prixTotal: c.prixTotal ?? c.prix_total ?? 0, dateNaissance: c.dateNaissance || c.date_naissance || '', utilisateurId: c.utilisateur_id || 0 })) : [];
+  const nbAlertes = stocks.filter((s: any) => { const qty = parseFloat(s.quantite) || 0; const seuil = parseFloat(s.seuil_alerte || s.seuilAlerte) || 0; return qty <= seuil; }).length + malades.length;
   const totalRevenusCheptel = cheptels.reduce((s: number, c: any) => s + (parseFloat(c.prix_total || c.prixTotal) || 0), 0);
   const revenusStock = stocks.reduce((s: number, i: any) => s + (parseFloat(i.prix_total || i.prixTotal) || 0), 0);
   const totalRevenus = (parseFloat(revenusStats.totalRevenus) || 0) + totalRevenusCheptel;
-  return { data: { nbParcelles: Array.isArray(parcelles) ? parcelles.length : 0, nbCultures: Array.isArray(cultures) ? cultures.length : 0, nbAnimaux: Array.isArray(cheptels) ? cheptels.length : 0, nbAlertes, totalRevenus, revenusStock, revenusCheptel: totalRevenusCheptel }, status: 200 };
+  return { data: { nbParcelles: Array.isArray(parcelles) ? parcelles.length : 0, nbCultures: Array.isArray(cultures) ? cultures.length : 0, nbAnimaux: Array.isArray(cheptels) ? cheptels.length : 0, nbAlertes, totalRevenus, revenusStock, revenusCheptel: totalRevenusCheptel, malades }, status: 200 };
 };
 
 export const getCultures = async () => {
