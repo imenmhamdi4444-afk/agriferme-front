@@ -60,3 +60,9 @@ export const getDashboard = async () => {
   const totalRevenus = (parseFloat(revenusStats.totalRevenus) || 0) + totalRevenusCheptel;
   return { data: { nbParcelles: Array.isArray(parcelles) ? parcelles.length : 0, nbCultures: Array.isArray(cultures) ? cultures.length : 0, nbAnimaux: Array.isArray(cheptels) ? cheptels.length : 0, nbAlertes, totalRevenus, revenusStock, revenusCheptel: totalRevenusCheptel }, status: 200 };
 };
+
+export const getCultures = async () => {
+  const res = await fetch(API_URL + '/cultures', { headers: getAuthHeaders() });
+  const data = await res.json();
+  return { data: Array.isArray(data) ? data : [], status: res.status };
+};
