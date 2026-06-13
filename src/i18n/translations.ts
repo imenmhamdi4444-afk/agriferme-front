@@ -176,6 +176,12 @@ const fr: TranslationMap = {
   'rapports.montant': 'Montant (DT)',
   'rapports.filterAnnee': 'Filtrer par année :',
   'rapports.actualiser': 'Actualiser',
+
+  'notif.title': 'Notifications',
+  'notif.empty': 'Aucune alerte',
+  'notif.stockBas': 'Stock bas',
+  'notif.animalMalade': 'Animal malade',
+  'notif.loading': 'Chargement...',
 };
 
 const en: TranslationMap = {
@@ -346,6 +352,12 @@ const en: TranslationMap = {
   'rapports.montant': 'Amount (TND)',
   'rapports.filterAnnee': 'Filter by year:',
   'rapports.actualiser': 'Refresh',
+
+  'notif.title': 'Notifications',
+  'notif.empty': 'No alerts',
+  'notif.stockBas': 'Low stock',
+  'notif.animalMalade': 'Sick animal',
+  'notif.loading': 'Loading...',
 };
 
 const ar: TranslationMap = {
@@ -516,6 +528,12 @@ const ar: TranslationMap = {
   'rapports.montant': 'المبلغ (د.ت)',
   'rapports.filterAnnee': 'تصفية حسب العام:',
   'rapports.actualiser': 'تحديث',
+
+  'notif.title': 'التنبيهات',
+  'notif.empty': 'ما كانش تنبيهات',
+  'notif.stockBas': 'مخزون منخفض',
+  'notif.animalMalade': 'حيوان مريض',
+  'notif.loading': 'جاري التحميل...',
 };
 
 export const translations: Record<Lang, TranslationMap> = { fr, en, ar };

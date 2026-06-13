@@ -3,10 +3,10 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../context/LanguageContext';
 import { useDarkMode } from '../context/DarkModeContext';
-import { LogOut, LayoutDashboard, Sprout, Wheat, Package, Beef, BarChart3, Shield, User, Menu, X, Globe, Moon, Sun as SunIcon } from 'lucide-react';
+import { Bell, AlertTriangle, AlertCircle, LogOut, LayoutDashboard, Sprout, Wheat, Package, Beef, BarChart3, Shield, User, Menu, X, Globe, Moon, Sun as SunIcon } from 'lucide-react';
 import { LANGUAGES } from '../i18n/translations';
-import NotificationBell from './NotificationBell';
-import WeatherWidget from './WeatherWidget';
+import { getStock } from '../api/stock';
+import { getCheptels } from '../api/cheptel';
 
 const userNavItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
@@ -15,7 +15,6 @@ const userNavItems = [
   { path: '/stock', labelKey: 'nav.stock', icon: Package },
   { path: '/cheptel', labelKey: 'nav.cheptel', icon: Beef },
   { path: '/rapports', labelKey: 'nav.rapports', icon: BarChart3 },
-  { path: '/profile', labelKey: 'nav.profile', icon: User },
 ];
 
 const AppLayout: React.FC = () => {
@@ -28,6 +27,46 @@ const AppLayout: React.FC = () => {
 
   const handleLogout = () => { logout(); navigate('/'); };
   const isActive = (path: string) => location.pathname === path;
+
+  const [alerts, setAlerts] = React.useState<{ type: 'stock' | 'cheptel'; nom: string; detail: string; link: string }[]>([]);
+  const [showNotif, setShowNotif] = React.useState(false);
+  const [notifLoading, setNotifLoading] = React.useState(false);
+  const notifRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const fetchAlerts = async () => {
+      if (!user) return;
+      setNotifLoading(true);
+      try {
+        const [stockRes, cheptelRes] = await Promise.all([getStock(), getCheptels()]);
+        const stocks = Array.isArray(stockRes.data) ? stockRes.data : [];
+        const cheptels = Array.isArray(cheptelRes.data) ? cheptelRes.data : [];
+        const items: { type: 'stock' | 'cheptel'; nom: string; detail: string; link: string }[] = [];
+        stocks.forEach((s: any) => {
+          const qty = parseFloat(s.quantite) || 0;
+          const seuil = parseFloat(s.seuilAlerte) || 0;
+          if (seuil > 0 && qty <= seuil) {
+            items.push({ type: 'stock', nom: s.nomProduit, detail: `${qty}/${seuil} ${s.unite || ''}`, link: '/stock' });
+          }
+        });
+        cheptels.forEach((c: any) => {
+          if (c.etatSante === 'Malade') {
+            items.push({ type: 'cheptel', nom: c.nom, detail: c.typeAnimal, link: '/cheptel' });
+          }
+        });
+        setAlerts(items);
+      } catch { /* ignore */ } finally { setNotifLoading(false); }
+    };
+    fetchAlerts();
+  }, [user]);
+
+  React.useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotif(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: bg, color: text }} dir={dir}>
@@ -51,11 +90,6 @@ const AppLayout: React.FC = () => {
         </div>
 
         <div style={{ flex: 1 }} />
-
-        {/* Weather widget */}
-        <div className="hide-mobile">
-          <WeatherWidget />
-        </div>
 
         {/* Dark mode toggle */}
         <button onClick={toggleDarkMode} title={darkMode ? 'Mode clair' : 'Mode sombre'} style={{
@@ -81,20 +115,89 @@ const AppLayout: React.FC = () => {
           <Globe size={13} color="white" style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
         </div>
 
-        {/* Notification Bell */}
-        <NotificationBell />
-
-        {/* User email - clickable to profile */}
+        {/* Notifications */}
         {user && (
-          <div onClick={() => navigate('/profile')} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            color: '#ecf0f1', fontSize: 13, cursor: 'pointer',
-            padding: '4px 8px', borderRadius: 6, transition: 'background 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-            <User size={15} />
-            <span>{user.email}</span>
+          <div ref={notifRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowNotif(!showNotif)}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+              style={{
+                background: 'none', border: 'none', color: 'white', cursor: 'pointer',
+                padding: '6px 10px', borderRadius: 6, position: 'relative',
+                display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Bell size={18} />
+              {alerts.length > 0 && (
+                <span style={{
+                  position: 'absolute', top: 0, right: 2,
+                  backgroundColor: '#e74c3c', color: 'white',
+                  fontSize: 10, fontWeight: 700,
+                  minWidth: 16, height: 16,
+                  borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 4px',
+                }}>
+                  {alerts.length}
+                </span>
+              )}
+            </button>
+
+            {showNotif && (
+              <div style={{
+                position: 'absolute', top: '100%', right: 0, marginTop: 8,
+                width: 360, maxHeight: 400, overflowY: 'auto',
+                backgroundColor: 'white', borderRadius: 8,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                zIndex: 200,
+              }}>
+                <div style={{
+                  padding: '12px 16px', borderBottom: '1px solid #eee',
+                  fontSize: 14, fontWeight: 700, color: '#2c3e50',
+                }}>
+                  {t('notif.title')} ({alerts.length})
+                </div>
+                {notifLoading ? (
+                  <div style={{ padding: '24px 16px', textAlign: 'center', color: '#95a5a6', fontSize: 13 }}>
+                    {t('notif.loading')}
+                  </div>
+                ) : alerts.length === 0 ? (
+                  <div style={{ padding: '24px 16px', textAlign: 'center', color: '#95a5a6', fontSize: 13 }}>
+                    {t('notif.empty')}
+                  </div>
+                ) : (
+                  alerts.map((a, i) => (
+                    <div
+                      key={i}
+                      onClick={() => { navigate(a.link); setShowNotif(false); }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      style={{
+                        padding: '10px 16px', cursor: 'pointer',
+                        display: 'flex', alignItems: 'flex-start', gap: 10,
+                        borderBottom: i < alerts.length - 1 ? '1px solid #f5f5f5' : 'none',
+                        transition: 'background 0.2s',
+                      }}
+                    >
+                      {a.type === 'stock' ? (
+                        <AlertTriangle size={18} color="#e67e22" style={{ flexShrink: 0, marginTop: 2 }} />
+                      ) : (
+                        <AlertCircle size={18} color="#e74c3c" style={{ flexShrink: 0, marginTop: 2 }} />
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, color: '#2c3e50', fontWeight: 500 }}>
+                          {a.type === 'stock' ? t('notif.stockBas') : t('notif.animalMalade')}: <strong>{a.nom}</strong>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#95a5a6', marginTop: 2 }}>
+                          {a.detail}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -156,7 +259,6 @@ const AppLayout: React.FC = () => {
       <style>{`
         @media (max-width: 768px) {
           .mobile-menu-btn { display: flex !important; }
-          .hide-mobile { display: none !important; }
         }
       `}</style>
     </div>
