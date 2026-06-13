@@ -12,7 +12,7 @@ import Cultures from './components/Cultures';
 import Stock from './components/Stock';
 import Cheptel from './components/Cheptel';
 import Rapports from './components/Rapports';
-import Profile from './components/Profile';
+import ForgotPassword from './components/ForgotPassword';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -24,6 +24,7 @@ const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
   return (
     <Routes>
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/" element={isAuthenticated ? <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/dashboard'} /> : <Login />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/admin" element={<DashboardAdmin />} />
@@ -33,7 +34,6 @@ const AppRoutes = () => {
         <Route path="/stock" element={<Stock />} />
         <Route path="/cheptel" element={<Cheptel />} />
         <Route path="/rapports" element={<Rapports />} />
-        <Route path="/profile" element={<Profile />} />
       </Route>
     </Routes>
   );

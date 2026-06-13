@@ -76,3 +76,22 @@ body.dark ::-webkit-scrollbar-thumb { background: #2d4a6b; border-radius: 4px; }
 
 /* ============ READABILITY - Both modes ============ */
 input::placeholder, textarea::placeholder { opacity: 1; }
+/* Notification panel - always solid, never transparent */
+.notif-panel, [data-notif="true"] {
+  background-color: #1e2d3d !important;
+  isolation: isolate !important;
+}
+
+body.dark [style*="zIndex: 9999"],
+body.dark [style*="z-index: 9999"] {
+  background-color: #1e2d3d !important;
+  color: #f0f4f8 !important;
+}
+
+/* Notification panel items in dark mode */
+body.dark [style*="zIndex: 9999"] div,
+body.dark [style*="zIndex: 9999"] p,
+body.dark [style*="zIndex: 9999"] span {
+  color: #f0f4f8 !important;
+  background-color: transparent !important;
+}

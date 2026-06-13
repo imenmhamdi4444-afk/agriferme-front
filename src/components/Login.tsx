@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
 
 const Login: React.FC = () => {
@@ -298,6 +298,11 @@ const Login: React.FC = () => {
             </button>
           </div>
         </form>
+          <div style={{ textAlign: 'center', marginTop: 14 }}>
+            <button onClick={() => navigate('/forgot-password')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#27ae60', fontSize: 14, fontWeight: 600, textDecoration: 'underline' }}>
+              Mot de passe oublie ?
+            </button>
+          </div>
 
         {/* Footer */}
         <div

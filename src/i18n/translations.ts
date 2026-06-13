@@ -176,6 +176,12 @@ const fr: TranslationMap = {
   'rapports.montant': 'Montant (DT)',
   'rapports.filterAnnee': 'Filtrer par année :',
   'rapports.actualiser': 'Actualiser',
+
+  'notif.title': 'Notifications',
+  'notif.empty': 'Aucune alerte',
+  'notif.stockBas': 'Stock bas',
+  'notif.animalMalade': 'Animal malade',
+  'notif.loading': 'Chargement...',
 };
 
 const en: TranslationMap = {
@@ -346,6 +352,12 @@ const en: TranslationMap = {
   'rapports.montant': 'Amount (TND)',
   'rapports.filterAnnee': 'Filter by year:',
   'rapports.actualiser': 'Refresh',
+
+  'notif.title': 'Notifications',
+  'notif.empty': 'No alerts',
+  'notif.stockBas': 'Low stock',
+  'notif.animalMalade': 'Sick animal',
+  'notif.loading': 'Loading...',
 };
 
 const ar: TranslationMap = {
@@ -358,7 +370,7 @@ const ar: TranslationMap = {
   'app.dashboard': 'لوبة القيادة',
 
   'nav.dashboard': 'لوبة القيادة',
-  'nav.parcelles': 'القطع',
+  'nav.parcelles': 'الأراضي',
   'nav.cultures': 'المحاصيل',
   'nav.stock': 'المخزون',
   'nav.cheptel': 'المواشي',
@@ -385,7 +397,7 @@ const ar: TranslationMap = {
   'admin.telephone': 'التليفون',
   'admin.ajouter': 'زيد',
   'admin.modifier': 'بدل',
-  'admin.supprimer': 'احذف',
+  'admin.supprimer': 'فسخ',
   'admin.actualiser': 'تحديث',
   'admin.total': 'المجموع',
   'admin.admins': 'آدمين',
@@ -398,8 +410,8 @@ const ar: TranslationMap = {
   'admin.statut': 'الحالة',
   'admin.actions': 'الإجراءات',
 
-  'user.welcome': 'مرحبا',
-  'user.parcelles': 'القطع',
+  'user.welcome': 'عسلاما',
+  'user.parcelles': 'الأراضي',
   'user.cultures': 'المحاصيل',
   'user.animaux': 'الحيوانات',
   'user.alertes': 'التنبيهات',
@@ -414,20 +426,20 @@ const ar: TranslationMap = {
   'user.date': 'التاريخ',
   'user.description': 'الوصف',
 
-  'parcelles.title': 'إدارة القطع',
+  'parcelles.title': 'إدارة الأراضي',
   'parcelles.nom': 'الاسم',
   'parcelles.surface': 'المساحة (هكتار)',
   'parcelles.localisation': 'الموقع',
   'parcelles.culture': 'المحصول',
   'parcelles.id': 'المعرف',
-  'parcelles.empty': 'ما لقيناش قطع',
-  'parcelles.confirmDelete': 'تحب تحذف هاذ القطعة؟',
+  'parcelles.empty': 'ما لقيناش أرض',
+  'parcelles.confirmDelete': 'تحب تحذف هاذ الأرض؟',
 
   'cultures.title': 'إدارة المحاصيل',
   'cultures.nom': 'الاسم',
   'cultures.dateSemis': 'تاريخ الزراعة',
   'cultures.dateRecolte': 'تاريخ الحصاد',
-  'cultures.parcelle': 'القطعة',
+  'cultures.parcelle': 'الأرض',
   'cultures.statut': 'الحالة',
   'cultures.select': 'ختار',
   'cultures.planifiee': 'مخطط',
@@ -452,7 +464,7 @@ const ar: TranslationMap = {
   'stock.sacs': 'كيس',
   'stock.bottes': 'ربطات',
   'stock.ok': 'صحيح',
-  'stock.stockBas': 'المخزون شحّ',
+  'stock.stockBas': 'مخزون منخفض',
   'stock.valeurTotale': 'القيمة الجملية',
   'stock.totalDepenses': 'مجموع المصاريف',
   'stock.alertes': 'تنبيهات',
@@ -476,7 +488,7 @@ const ar: TranslationMap = {
   'cheptel.prixTotal': 'السعر الجملي (د.ت)',
   'cheptel.ajouter': 'زيد',
   'cheptel.modifier': 'بدل',
-  'cheptel.supprimer': 'احذف',
+  'cheptel.supprimer': 'فسخ',
   'cheptel.actualiser': 'تحديث',
   'cheptel.annuler': 'الغي',
   'cheptel.editionMode': 'وضع التبديل',
@@ -516,6 +528,12 @@ const ar: TranslationMap = {
   'rapports.montant': 'المبلغ (د.ت)',
   'rapports.filterAnnee': 'تصفية حسب العام:',
   'rapports.actualiser': 'تحديث',
+
+  'notif.title': 'التنبيهات',
+  'notif.empty': 'ما كانش تنبيهات',
+  'notif.stockBas': 'مخزون منخفض',
+  'notif.animalMalade': 'حيوان مريض',
+  'notif.loading': 'جاري التحميل...',
 };
 
 export const translations: Record<Lang, TranslationMap> = { fr, en, ar };
