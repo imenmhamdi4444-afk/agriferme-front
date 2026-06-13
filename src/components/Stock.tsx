@@ -6,7 +6,7 @@ import Spinner from './Spinner';
 import { useToast } from '../hooks/useToast';
 import { getStock, createStock, updateStock, deleteStock } from '../api/stock';
 import { Stock as StockItem } from '../types';
-import { Package, Plus, Pencil, Trash2, RefreshCw, DollarSign, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Package, Plus, Pencil, Trash2, RefreshCw, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
 
 const Stock: React.FC = () => {
@@ -147,7 +147,7 @@ const Stock: React.FC = () => {
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
         <div style={{ backgroundColor: 'white', borderRadius: 10, padding: 15, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', minWidth: 160, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <DollarSign size={18} color="#27ae60" />
+            <span style={{ fontWeight:'bold', fontSize:14, color:'#27ae60' }}>DT</span>
             <span style={{ fontWeight: 'bold', fontSize: 13 }}>{t('stock.valeurTotale')}</span>
           </div>
           <span style={{ fontSize: 18, color: '#27ae60', fontWeight: 'bold' }}>{valeurTotale.toFixed(3)} DT</span>

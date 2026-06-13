@@ -10,7 +10,7 @@ import { getCheptel, getAnimauxMalades, createCheptel, updateCheptel, deleteChep
 import { sendRdvEmail } from '../api/emailjs';
 import { Cheptel as CheptelType } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { Beef, Plus, Pencil, Trash2, RefreshCw, AlertTriangle, CheckCircle, AlertCircle, DollarSign, Calendar, Circle } from 'lucide-react';
+import { Beef, Plus, Pencil, Trash2, RefreshCw, AlertTriangle, CheckCircle, AlertCircle, Calendar, Circle } from 'lucide-react';
 import VetAssistant from './VetAssistant';
 
 const Cheptel: React.FC = () => {
@@ -276,7 +276,7 @@ const Cheptel: React.FC = () => {
         </div>
         <div style={{ minWidth: 140 }}>
           <p style={{ fontWeight: 'bold', margin: '0 0 6px 0', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6, color: '#7f8c8d' }}>
-            <DollarSign size={18} color="#e67e22" /> {t('cheptel.totalRevenus')}
+            <span style={{ fontWeight:'bold', fontSize:14, color:'#e67e22' }}>DT</span> {t('cheptel.totalRevenus')}
           </p>
           <p style={{ fontSize: 26, color: '#e67e22', fontWeight: 'bold', margin: 0 }}>{totalRevenus.toFixed(3)} DT</p>
         </div>
@@ -330,7 +330,7 @@ const Cheptel: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '2 1 200px', minWidth: 180 }}>
                 <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.animal')}</label>
                 <select value={rdvAnimal} onChange={(e) => setRdvAnimal(e.target.value)} style={{ ...ipt, width: '100%' }}>
-                  <option value="">Sélectionner...</option>
+                  <option value="">{t('cheptel.selectPlaceholder')}</option>
                   {malades.map((m, i) => <option key={m.id} value={i}>{m.nom} - {m.typeAnimal}{m.maladie ? ` (${m.maladie})` : ''}</option>)}
                 </select>
               </div>

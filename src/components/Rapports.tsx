@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getIndicateurs, getDepenses, getRevenus, getCultures } from '../api/rapports';
 import { IndicateursFinanciers, Stock, Cheptel, Culture } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { BarChart3, DollarSign, TrendingDown, TrendingUp, Calendar, PieChart as PieChartIcon, RefreshCw, Sprout, Heart, Package } from 'lucide-react';
+import { BarChart3, TrendingDown, TrendingUp, Calendar, PieChart as PieChartIcon, RefreshCw, Sprout, Heart, Package } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const COLORS_DEPENSES = ['#e74c3c', '#c0392b', '#e67e22', '#d35400'];
@@ -64,7 +64,7 @@ const Rapports: React.FC = () => {
 
       <div style={{ display: 'flex', gap: 14, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
-          { icon: DollarSign, color: '#27ae60', label: t('rapports.revenus'), value: `${(indicateurs?.totalRevenus ?? 0).toFixed(3)} DT` },
+          { icon: () => <span style={{fontWeight:'bold',fontSize:14,color:'#27ae60'}}>DT</span>, color: '#27ae60', label: t('rapports.revenus'), value: `${(indicateurs?.totalRevenus ?? 0).toFixed(3)} DT` },
           { icon: TrendingDown, color: '#e74c3c', label: t('rapports.depenses'), value: `${(indicateurs?.totalDepenses ?? 0).toFixed(3)} DT` },
           { icon: TrendingUp, color: '#3498db', label: t('rapports.benefice'), value: `${(indicateurs?.benefice ?? 0).toFixed(3)} DT` },
           { icon: BarChart3, color: '#2c3e50', label: t('rapports.marge'), value: `${(indicateurs?.marge ?? 0).toFixed(1)}%` },

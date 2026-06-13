@@ -1,4 +1,4 @@
-export type Lang = 'fr' | 'en' | 'ar';
+﻿export type Lang = 'fr' | 'en' | 'ar';
 
 export const LANGUAGES: { code: Lang; label: string; native: string }[] = [
   { code: 'fr', label: 'Français', native: 'Français' },
@@ -23,6 +23,7 @@ const fr: TranslationMap = {
   'nav.stock': 'Stock',
   'nav.cheptel': 'Cheptel',
   'nav.rapports': 'Rapports',
+  'nav.profile': 'Mon Profil',
 
   'login.title': 'CONNEXION',
   'login.email': 'Email :',
@@ -160,6 +161,7 @@ const fr: TranslationMap = {
   'cheptel.empty': 'Aucun animal trouvé',
   'cheptel.confirmDelete': 'Supprimer cet animal ?',
   'cheptel.rdvSuccess': 'RDV vétérinaire demandé !',
+  'cheptel.selectPlaceholder': 'Sélectionner...',
   'cheptel.selectAnimalDate': 'Sélectionnez un animal et une date',
 
   'rapports.title': 'Tableau de Bord Financier',
@@ -191,6 +193,7 @@ const en: TranslationMap = {
   'nav.stock': 'Stock',
   'nav.cheptel': 'Livestock',
   'nav.rapports': 'Reports',
+  'nav.profile': 'My Profile',
 
   'login.title': 'LOGIN',
   'login.email': 'Email:',
@@ -328,6 +331,7 @@ const en: TranslationMap = {
   'cheptel.empty': 'No animals found',
   'cheptel.confirmDelete': 'Delete this animal?',
   'cheptel.rdvSuccess': 'Vet appointment requested!',
+  'cheptel.selectPlaceholder': 'Select...',
   'cheptel.selectAnimalDate': 'Select an animal and a date',
 
   'rapports.title': 'Financial Dashboard',
@@ -359,6 +363,7 @@ const ar: TranslationMap = {
   'nav.stock': 'المخزون',
   'nav.cheptel': 'المواشي',
   'nav.rapports': 'التقارير',
+  'nav.profile': 'حسابي',
 
   'login.title': 'الدخول',
   'login.email': 'الإيميل :',
@@ -496,6 +501,7 @@ const ar: TranslationMap = {
   'cheptel.empty': 'ما لقيناش حيوانات',
   'cheptel.confirmDelete': 'تحب تحذف هاذ الحيوان؟',
   'cheptel.rdvSuccess': 'تم طلب موعد البيطري!',
+  'cheptel.selectPlaceholder': 'ختار...',
   'cheptel.selectAnimalDate': 'ختار حيوان وتاريخ',
 
   'rapports.title': 'لوبة المال',

@@ -1,13 +1,15 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import { useDarkMode } from '../context/DarkModeContext';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getDashboard, getAllRevenus } from '../api/rapports';
 import { StatistiquesDashboard, RevenuDTO, Cheptel as CheptelType } from '../types';
 import { useTranslation } from '../context/LanguageContext';
-import { Sprout, Wheat, PawPrint, AlertTriangle, DollarSign, RefreshCw, Package, Calendar } from 'lucide-react';
+import { Sprout, Wheat, PawPrint, AlertTriangle, RefreshCw, Package, Calendar } from 'lucide-react';
 
 const DashboardUser: React.FC = () => {
   const { user } = useAuth();
+  const dm = useDarkMode(); const c = { cardBg: dm.cardBg, text: dm.text, textSecondary: dm.textSecondary, bg: dm.bg, border: dm.border };
   const [dashboard, setDashboard] = useState<StatistiquesDashboard | null>(null);
   const [revenus, setRevenus] = useState<RevenuDTO[]>([]);
   const navigate = useNavigate();
@@ -47,7 +49,7 @@ const DashboardUser: React.FC = () => {
         <div
           style={{
             ...styles.cardBase,
-            backgroundColor: 'white',
+            backgroundColor: '#ffffff',
             transform: hoveredCard === 'parcelles' ? 'translateY(-2px)' : 'none',
             boxShadow: hoveredCard === 'parcelles' ? '0 6px 12px rgba(0,0,0,0.15)' : '0 3px 5px rgba(0,0,0,0.1)',
           }}
@@ -64,7 +66,7 @@ const DashboardUser: React.FC = () => {
         <div
           style={{
             ...styles.cardBase,
-            backgroundColor: 'white',
+            backgroundColor: '#ffffff',
             transform: hoveredCard === 'cultures' ? 'translateY(-2px)' : 'none',
             boxShadow: hoveredCard === 'cultures' ? '0 6px 12px rgba(0,0,0,0.15)' : '0 3px 5px rgba(0,0,0,0.1)',
           }}
@@ -81,7 +83,7 @@ const DashboardUser: React.FC = () => {
         <div
           style={{
             ...styles.cardBase,
-            backgroundColor: 'white',
+            backgroundColor: '#ffffff',
             transform: hoveredCard === 'animaux' ? 'translateY(-2px)' : 'none',
             boxShadow: hoveredCard === 'animaux' ? '0 6px 12px rgba(0,0,0,0.15)' : '0 3px 5px rgba(0,0,0,0.1)',
           }}
@@ -122,7 +124,7 @@ const DashboardUser: React.FC = () => {
           onMouseEnter={() => setHoveredCard('revenus')}
           onMouseLeave={() => setHoveredCard(null)}
         >
-          <DollarSign size={30} color="#27ae60" />
+          <span style={{ fontWeight:'bold', fontSize:22, color:'#27ae60' }}>DT</span>
           <span style={styles.cardLabel}>{t('user.totalRevenus')}</span>
           <span style={{ fontSize: 18, fontWeight: 'bold', color: '#27ae60', margin: 0 }}>
             {(dashboard?.totalRevenus ?? 0).toFixed(3)} DT
@@ -143,7 +145,7 @@ const DashboardUser: React.FC = () => {
             <div style={{ fontWeight: 600, fontSize: 13, color: '#c0392b', marginBottom: 6 }}>
               Animaux malades ({maladesList.length})
             </div>
-            <div style={{ maxHeight: 140, overflowY: 'auto', border: '1px solid #e74c3c', borderRadius: 4, backgroundColor: 'white' }}>
+            <div style={{ maxHeight: 140, overflowY: 'auto', border: '1px solid #e74c3c', borderRadius: 4, backgroundColor: '#ffffff' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
                   <tr style={{ backgroundColor: '#fdebd0', borderBottom: '1px solid #e74c3c' }}>
@@ -177,7 +179,7 @@ const DashboardUser: React.FC = () => {
 
       <div style={styles.revenuCard}>
         <div style={styles.revenuTitle}>
-          <DollarSign size={16} style={{ verticalAlign: 'middle', marginRight: 5 }} />
+          <span style={{ fontWeight:'bold', fontSize:13, verticalAlign:'middle', marginRight:5 }}>DT</span>
           {t('user.listeRevenus')}
         </div>
 
@@ -290,7 +292,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'pre-line',
   },
   revenuCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: 8,
     padding: 12,
     boxShadow: '0 3px 5px rgba(0,0,0,0.1)',
@@ -346,7 +348,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   td: {
     padding: '6px 8px',
-    borderBottom: '1px solid #dee2e6',
+    borderBottom: '1px solid ' + '#dee2e6',
   },
   refreshBtn: {
     backgroundColor: '#3498db',
