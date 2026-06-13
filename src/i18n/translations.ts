@@ -1,4 +1,4 @@
-export type Lang = 'fr' | 'en' | 'ar';
+﻿export type Lang = 'fr' | 'en' | 'ar';
 
 export const LANGUAGES: { code: Lang; label: string; native: string }[] = [
   { code: 'fr', label: 'Français', native: 'Français' },
@@ -23,6 +23,7 @@ const fr: TranslationMap = {
   'nav.stock': 'Stock',
   'nav.cheptel': 'Cheptel',
   'nav.rapports': 'Rapports',
+  'nav.profile': 'Mon Profil',
 
   'login.title': 'CONNEXION',
   'login.email': 'Email :',
@@ -192,6 +193,7 @@ const en: TranslationMap = {
   'nav.stock': 'Stock',
   'nav.cheptel': 'Livestock',
   'nav.rapports': 'Reports',
+  'nav.profile': 'My Profile',
 
   'login.title': 'LOGIN',
   'login.email': 'Email:',
@@ -361,6 +363,7 @@ const ar: TranslationMap = {
   'nav.stock': 'المخزون',
   'nav.cheptel': 'المواشي',
   'nav.rapports': 'التقارير',
+  'nav.profile': 'حسابي',
 
   'login.title': 'الدخول',
   'login.email': 'الإيميل :',

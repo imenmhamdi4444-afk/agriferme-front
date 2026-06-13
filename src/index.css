@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -7,3 +7,72 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+/* ============ DARK MODE ============ */
+body.dark { background-color: #0f1923 !important; }
+
+/* Force ALL content dark */
+body.dark * {
+  color: #f0f4f8 !important;
+  border-color: #2d4a6b !important;
+}
+
+/* White/light backgrounds → dark */
+body.dark div, body.dark section, body.dark article, body.dark main,
+body.dark table, body.dark thead, body.dark tbody, body.dark tr,
+body.dark form {
+  background-color: transparent !important;
+}
+
+/* Cards - any div that had white bg */
+body.dark [style] {
+  background-color: inherit !important;
+}
+
+body.dark { --card: #1e2d3d; --input: #162535; --page: #0f1923; }
+
+/* Specifically target elements that use white */
+body.dark td { background-color: #1e2d3d !important; }
+body.dark th { background-color: #162535 !important; }
+body.dark tr:nth-child(even) td { background-color: #1a2a3a !important; }
+body.dark tr:hover td { background-color: #1a3550 !important; }
+
+/* Inputs */
+body.dark input, body.dark select, body.dark textarea {
+  background-color: #162535 !important;
+  color: #f0f4f8 !important;
+  border-color: #2d4a6b !important;
+}
+body.dark input::placeholder { color: #6b8099 !important; }
+
+/* Keep these colors - they convey meaning */
+body.dark [style*="color: #27ae60"],
+body.dark [style*="color: rgb(39, 174, 96)"] { color: #2ecc71 !important; }
+body.dark [style*="color: #e74c3c"],
+body.dark [style*="color: rgb(231, 76, 60)"] { color: #ff6b6b !important; }
+body.dark [style*="color: #e67e22"],
+body.dark [style*="color: rgb(230, 126, 34)"] { color: #ffa54f !important; }
+body.dark [style*="color: #3498db"],
+body.dark [style*="color: rgb(52, 152, 219)"] { color: #74b9e8 !important; }
+body.dark [style*="color: #f39c12"] { color: #f9ca24 !important; }
+body.dark [style*="color: white"] { color: white !important; }
+
+/* Buttons keep colors */
+body.dark button[style*="#27ae60"],
+body.dark button[style*="rgb(39, 174"] { background-color: #1e8449 !important; color: white !important; }
+body.dark button[style*="#e74c3c"],
+body.dark button[style*="rgb(231, 76"] { background-color: #c0392b !important; color: white !important; }
+body.dark button[style*="#3498db"],
+body.dark button[style*="rgb(52, 152"] { background-color: #2471a3 !important; color: white !important; }
+body.dark button[style*="#2c3e50"],
+body.dark button[style*="rgb(44, 62"] { background-color: #1a252f !important; color: white !important; }
+body.dark button[style*="#95a5a6"] { background-color: #6c7a89 !important; color: white !important; }
+
+/* Scrollbar */
+body.dark ::-webkit-scrollbar { width: 8px; background: #1e2d3d; }
+body.dark ::-webkit-scrollbar-thumb { background: #2d4a6b; border-radius: 4px; }
+
+/* Smooth transition on toggle */
+*, *::before, *::after { transition: background-color 0.2s, color 0.15s, border-color 0.15s; }
+
+/* ============ READABILITY - Both modes ============ */
+input::placeholder, textarea::placeholder { opacity: 1; }
