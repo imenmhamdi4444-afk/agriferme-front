@@ -1,76 +1,86 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import { useTranslation } from '../context/LanguageContext';
+import React, { useState, useEffect } from 'react';
 import { getVeterinaires, createRendezVous, Veterinaire } from '../api/veterinaires';
 import { sendRdvEmail } from '../api/emailjs';
+import { useAuth } from '../context/AuthContext';
+import { X, MapPin, Phone, Mail, Stethoscope, Calendar, Search } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 import Toast from './Toast';
-import { Search, MapPin, Stethoscope, Calendar, X, Phone, Mail, CheckCircle } from 'lucide-react';
 
 interface Props {
-  animalNom: string;
-  animalType: string;
-  maladie: string;
+  animal: { id: number; nom: string; typeAnimal: string; maladie?: string };
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const RDVModal: React.FC<Props> = ({ animalNom, animalType, maladie, onClose, onSuccess }) => {
+const RDVModal: React.FC<Props> = ({ animal, onClose, onSuccess }) => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const { toast, showToast, hideToast } = useToast();
   const [vets, setVets] = useState<Veterinaire[]>([]);
-  const [filteredVets, setFilteredVets] = useState<Veterinaire[]>([]);
+  const [filtered, setFiltered] = useState<Veterinaire[]>([]);
   const [search, setSearch] = useState('');
   const [selectedVet, setSelectedVet] = useState<Veterinaire | null>(null);
   const [dateRdv, setDateRdv] = useState('');
-  const [motif, setMotif] = useState(maladie || '');
+  const [motif, setMotif] = useState(animal.maladie || '');
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'select' | 'confirm' | 'done'>('select');
+  const [step, setStep] = useState<'select' | 'confirm'>('select');
 
   useEffect(() => {
     loadVets();
   }, []);
 
   useEffect(() => {
-    if (!search) { setFilteredVets(vets); return; }
-    const s = search.toLowerCase();
-    setFilteredVets(vets.filter(v =>
-      v.nom.toLowerCase().includes(s) ||
-      v.ville?.toLowerCase().includes(s) ||
-      v.specialite?.toLowerCase().includes(s)
-    ));
+    if (search.trim()) {
+      setFiltered(vets.filter(v =>
+        v.nom.toLowerCase().includes(search.toLowerCase()) ||
+        v.ville.toLowerCase().includes(search.toLowerCase()) ||
+        v.specialite.toLowerCase().includes(search.toLowerCase())
+      ));
+    } else {
+      setFiltered(vets);
+    }
   }, [search, vets]);
 
   const loadVets = async () => {
     try {
       const res = await getVeterinaires();
       setVets(Array.isArray(res.data) ? res.data : []);
-      setFilteredVets(Array.isArray(res.data) ? res.data : []);
-    } catch { showToast('Erreur chargement vétérinaires', 'error'); }
+      setFiltered(Array.isArray(res.data) ? res.data : []);
+    } catch { showToast('Erreur de chargement des vétérinaires', 'error'); }
   };
 
-  const handleBook = async () => {
-    if (!selectedVet) { showToast('Sélectionnez un vétérinaire', 'warning'); return; }
+  const handleConfirm = async () => {
+    if (!selectedVet) { showToast(t('vet.none'), 'warning'); return; }
     if (!dateRdv) { showToast('Choisissez une date', 'warning'); return; }
     setLoading(true);
     try {
       // Save RDV in DB
       await createRendezVous({
-        animalNom, animalType,
+        animalNom: animal.nom,
+        animalType: animal.typeAnimal,
         veterinaireId: selectedVet.id,
         veterinaireNom: selectedVet.nom,
-        dateRdv, motif,
+        dateRdv,
+        motif,
       });
-
       // Send email to vet
-      await sendRdvEmail({
-        animalNom, typeAnimal: animalType,
-        maladie: motif, dateRdv,
-        motif, vet_email: selectedVet.email,
-      });
-
-      setStep('done');
-      onSuccess();
-    } catch (e) {
-      showToast('Erreur lors de la réservation', 'error');
-    } finally { setLoading(false); }
+      try {
+        await sendRdvEmail({
+          animal_nom: animal.nom,
+          type_animal: animal.typeAnimal,
+          maladie: animal.maladie || motif,
+          date_rdv: dateRdv,
+          motif,
+          vet_email: selectedVet.email,
+          vet_nom: selectedVet.nom,
+          farmer_email: user?.email || '',
+        });
+      } catch { /* email failure doesn't block RDV */ }
+      showToast(`RDV confirmé avec ${selectedVet.nom} !`, 'success');
+      setTimeout(() => { onSuccess(); onClose(); }, 1500);
+    } catch { showToast('Erreur lors de la réservation', 'error'); }
+    finally { setLoading(false); }
   };
 
   const overlay: React.CSSProperties = {
@@ -78,148 +88,125 @@ const RDVModal: React.FC<Props> = ({ animalNom, animalType, maladie, onClose, on
     zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
   };
   const modal: React.CSSProperties = {
-    backgroundColor: 'white', borderRadius: 14, width: '100%', maxWidth: 560,
-    maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+    backgroundColor: 'white', borderRadius: 12, width: '100%', maxWidth: 600,
+    maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
   };
-  const ipt: React.CSSProperties = {
-    width: '100%', padding: '10px 14px', borderRadius: 8,
-    border: '1.5px solid #bdc3c7', fontSize: 14, outline: 'none', boxSizing: 'border-box' as const,
-  };
-
-  if (step === 'done') return (
-    <div style={overlay}>
-      <div style={{ ...modal, padding: 36, textAlign: 'center' }}>
-        <CheckCircle size={56} color="#27ae60" style={{ marginBottom: 16 }} />
-        <h2 style={{ color: '#2c3e50', fontSize: 22, fontWeight: 700, margin: '0 0 8px' }}>RDV confirmé !</h2>
-        <p style={{ color: '#7f8c8d', fontSize: 15, margin: '0 0 6px' }}>
-          Votre demande a été envoyée à <strong>{selectedVet?.nom}</strong>
-        </p>
-        <p style={{ color: '#7f8c8d', fontSize: 14, margin: '0 0 24px' }}>
-          📅 {dateRdv} · 🐄 {animalNom}
-        </p>
-        <p style={{ color: '#95a5a6', fontSize: 13, margin: '0 0 24px' }}>
-          Le vétérinaire a reçu un email et vous contactera pour confirmer.
-        </p>
-        <button onClick={onClose} style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
-          Fermer
-        </button>
-      </div>
-    </div>
-  );
 
   return (
     <div style={overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={modal}>
         {/* Header */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #ecf0f1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #ecf0f1', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h2 style={{ color: '#2c3e50', fontSize: 20, fontWeight: 700, margin: 0 }}>Prendre un RDV vétérinaire</h2>
-            <p style={{ color: '#7f8c8d', fontSize: 13, margin: '4px 0 0' }}>🐄 {animalNom} · {animalType}</p>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#2c3e50' }}>
+              {step === 'select' ? 'Choisir un vétérinaire' : t('vet.confirm')}
+            </h3>
+            <p style={{ margin: '2px 0 0', fontSize: 13, color: '#7f8c8d' }}>
+              Animal: <strong>{animal.nom}</strong> ({animal.typeAnimal})
+            </p>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7f8c8d' }}><X size={22} /></button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+            <X size={20} color="#7f8c8d" />
+          </button>
         </div>
 
-        <div style={{ padding: 24 }}>
-          {/* Search vets */}
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, fontWeight: 700, color: '#2c3e50', display: 'block', marginBottom: 8 }}>
-              Choisir un vétérinaire partenaire
-            </label>
-            <div style={{ position: 'relative', marginBottom: 12 }}>
-              <Search size={16} color="#7f8c8d" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher par nom, ville, spécialité..."
-                style={{ ...ipt, paddingLeft: 36 }}
-                onFocus={e => e.currentTarget.style.borderColor = '#27ae60'}
-                onBlur={e => e.currentTarget.style.borderColor = '#bdc3c7'} />
+        {/* Step 1 - Select vet */}
+        {step === 'select' && (
+          <>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid #f0f0f0' }}>
+              <div style={{ position: 'relative' }}>
+                <Search size={15} color="#7f8c8d" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+                <input value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder="Rechercher par nom, ville ou spécialité..."
+                  style={{ width: '100%', padding: '9px 12px 9px 32px', borderRadius: 8, border: '1.5px solid #bdc3c7', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+                  onFocus={e => e.currentTarget.style.borderColor = '#27ae60'}
+                  onBlur={e => e.currentTarget.style.borderColor = '#bdc3c7'} />
+              </div>
             </div>
-
-            {/* Vet list */}
-            <div style={{ maxHeight: 280, overflowY: 'auto', border: '1px solid #ecf0f1', borderRadius: 8 }}>
-              {filteredVets.length === 0 ? (
-                <div style={{ padding: 24, textAlign: 'center', color: '#95a5a6', fontSize: 14 }}>Aucun vétérinaire trouvé</div>
-              ) : filteredVets.map(vet => (
+            <div style={{ overflowY: 'auto', flex: 1, padding: '8px 12px' }}>
+              {filtered.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#7f8c8d' }}>{t("vet.none")}</div>
+              ) : filtered.map(vet => (
                 <div key={vet.id} onClick={() => setSelectedVet(vet)}
                   style={{
-                    padding: '12px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
-                    borderBottom: '1px solid #f8f9fa',
-                    backgroundColor: selectedVet?.id === vet.id ? '#e8f5e9' : 'transparent',
-                    border: selectedVet?.id === vet.id ? '2px solid #27ae60' : '1px solid transparent',
-                    borderRadius: selectedVet?.id === vet.id ? 8 : 0,
-                    transition: 'all 0.15s',
+                    padding: '14px 16px', borderRadius: 10, marginBottom: 8, cursor: 'pointer',
+                    border: `2px solid ${selectedVet?.id === vet.id ? '#27ae60' : '#ecf0f1'}`,
+                    backgroundColor: selectedVet?.id === vet.id ? '#f0fdf4' : 'white',
+                    transition: 'all 0.2s',
                   }}
-                  onMouseEnter={e => { if (selectedVet?.id !== vet.id) e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
-                  onMouseLeave={e => { if (selectedVet?.id !== vet.id) e.currentTarget.style.backgroundColor = 'transparent'; }}>
-                  
-                  {/* Avatar */}
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', backgroundColor: '#e8f5e9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Stethoscope size={20} color="#27ae60" />
-                  </div>
-
-                  {/* Info */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: '#2c3e50' }}>{vet.nom}</div>
-                    <div style={{ fontSize: 12, color: '#7f8c8d', display: 'flex', gap: 10, marginTop: 2 }}>
-                      <span><Stethoscope size={11} style={{ verticalAlign: 'middle' }} /> {vet.specialite}</span>
-                      <span><MapPin size={11} style={{ verticalAlign: 'middle' }} /> {vet.ville}</span>
+                  onMouseEnter={e => { if (selectedVet?.id !== vet.id) e.currentTarget.style.borderColor = '#bdc3c7'; }}
+                  onMouseLeave={e => { if (selectedVet?.id !== vet.id) e.currentTarget.style.borderColor = '#ecf0f1'; }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: '#2c3e50' }}>{vet.nom}</div>
+                      <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 13, color: '#27ae60', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Stethoscope size={13} /> {vet.specialite}
+                        </span>
+                        <span style={{ fontSize: 13, color: '#7f8c8d', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={13} /> {vet.ville}
+                        </span>
+                        <span style={{ fontSize: 13, color: '#7f8c8d', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Phone size={13} /> {vet.telephone}
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 12, color: '#95a5a6', marginTop: 2, display: 'flex', gap: 10 }}>
-                      <span><Phone size={11} style={{ verticalAlign: 'middle' }} /> {vet.telephone}</span>
-                      <span><Mail size={11} style={{ verticalAlign: 'middle' }} /> {vet.email}</span>
-                    </div>
+                    <span style={{ backgroundColor: '#e8f5e9', color: '#27ae60', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 20 }}>
+                      Disponible
+                    </span>
                   </div>
-
-                  {selectedVet?.id === vet.id && <CheckCircle size={20} color="#27ae60" />}
                 </div>
               ))}
             </div>
-          </div>
+            <div style={{ padding: '12px 20px', borderTop: '1px solid #ecf0f1' }}>
+              <button onClick={() => { if (!selectedVet) { showToast(t('vet.none'), 'warning'); return; } setStep('confirm'); }}
+                style={{ width: '100%', padding: '12px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                Continuer →
+              </button>
+            </div>
+          </>
+        )}
 
-          {/* Date & Motif */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 700, color: '#2c3e50', display: 'block', marginBottom: 6 }}>
-                <Calendar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Date souhaitée
+        {/* Step 2 - Confirm */}
+        {step === 'confirm' && selectedVet && (
+          <div style={{ padding: 20, overflowY: 'auto' }}>
+            {/* Selected vet summary */}
+            <div style={{ backgroundColor: '#f0fdf4', borderRadius: 10, padding: 16, marginBottom: 20, border: '1px solid #bbf7d0' }}>
+              <div style={{ fontWeight: 700, color: '#2c3e50', marginBottom: 4 }}>{selectedVet.nom}</div>
+              <div style={{ fontSize: 13, color: '#7f8c8d' }}>{selectedVet.specialite} • {selectedVet.ville}</div>
+              <div style={{ fontSize: 13, color: '#7f8c8d', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Mail size={12} /> {selectedVet.email}
+              </div>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: '#7f8c8d', display: 'block', marginBottom: 6 }}>
+                <Calendar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Date du RDV
               </label>
               <input type="date" value={dateRdv} onChange={e => setDateRdv(e.target.value)}
-                min={new Date().toISOString().split('T')[0]} style={ipt}
+                min={new Date().toISOString().split('T')[0]}
+                style={{ width: '100%', padding: '11px 14px', borderRadius: 8, border: '1.5px solid #bdc3c7', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
                 onFocus={e => e.currentTarget.style.borderColor = '#27ae60'}
                 onBlur={e => e.currentTarget.style.borderColor = '#bdc3c7'} />
             </div>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 700, color: '#2c3e50', display: 'block', marginBottom: 6 }}>
-                Motif / Symptômes
-              </label>
-              <input value={motif} onChange={e => setMotif(e.target.value)} placeholder="Fièvre, boiterie..."
-                style={ipt}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: '#7f8c8d', display: 'block', marginBottom: 6 }}>Motif / Symptômes</label>
+              <textarea value={motif} onChange={e => setMotif(e.target.value)} rows={3}
+                placeholder="Décrivez les symptômes ou la raison du RDV..."
+                style={{ width: '100%', padding: '11px 14px', borderRadius: 8, border: '1.5px solid #bdc3c7', fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
                 onFocus={e => e.currentTarget.style.borderColor = '#27ae60'}
                 onBlur={e => e.currentTarget.style.borderColor = '#bdc3c7'} />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setStep('select')} style={{ flex: 1, padding: '12px', backgroundColor: '#ecf0f1', color: '#2c3e50', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                ← Retour
+              </button>
+              <button onClick={handleConfirm} disabled={loading} style={{ flex: 2, padding: '12px', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                {loading ? 'Envoi...' : '✓ Confirmer le RDV'}
+              </button>
             </div>
           </div>
-
-          {/* Selected vet summary */}
-          {selectedVet && (
-            <div style={{ backgroundColor: '#e8f5e9', borderRadius: 8, padding: '12px 16px', marginBottom: 16, border: '1px solid #a9dfbf' }}>
-              <p style={{ margin: 0, fontSize: 14, color: '#1e8449', fontWeight: 600 }}>
-                ✅ Vétérinaire sélectionné: {selectedVet.nom} — {selectedVet.ville}
-              </p>
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: '#27ae60' }}>
-                Un email de demande RDV sera envoyé automatiquement à ce vétérinaire.
-              </p>
-            </div>
-          )}
-
-          {/* Book button */}
-          <button onClick={handleBook} disabled={loading || !selectedVet || !dateRdv}
-            style={{
-              width: '100%', padding: '13px', backgroundColor: selectedVet && dateRdv ? '#27ae60' : '#bdc3c7',
-              color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 700,
-              cursor: selectedVet && dateRdv ? 'pointer' : 'not-allowed', transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { if (selectedVet && dateRdv) e.currentTarget.style.backgroundColor = '#1e8449'; }}
-            onMouseLeave={e => { if (selectedVet && dateRdv) e.currentTarget.style.backgroundColor = '#27ae60'; }}>
-            {loading ? 'Envoi en cours...' : '📅 Confirmer le RDV'}
-          </button>
-        </div>
+        )}
       </div>
       {toast.visible && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
     </div>

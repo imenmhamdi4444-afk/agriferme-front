@@ -12,6 +12,8 @@ import { Cheptel as CheptelType } from '../types';
 import { useTranslation } from '../context/LanguageContext';
 import { Beef, Plus, Pencil, Trash2, RefreshCw, AlertTriangle, CheckCircle, AlertCircle, Calendar, Circle } from 'lucide-react';
 import VetAssistant from './VetAssistant';
+import RDVModal from './RDVModal';
+import { getRendezVous } from '../api/veterinaires';
 
 const Cheptel: React.FC = () => {
   const { logout } = useAuth();
@@ -34,9 +36,10 @@ const Cheptel: React.FC = () => {
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
   const { toast, showToast, hideToast } = useToast();
-  const [rdvAnimal, setRdvAnimal] = useState('');
-  const [rdvDate, setRdvDate] = useState('');
-  const [rdvMotif, setRdvMotif] = useState('');
+  const [showRdvModal, setShowRdvModal] = useState(false);
+  const [selectedAnimalForRdv, setSelectedAnimalForRdv] = useState<CheptelType | null>(null);
+  const [rdvHistory, setRdvHistory] = useState<any[]>([]);
+  const [showRdvHistory, setShowRdvHistory] = useState(false);
   const maladesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,24 +98,6 @@ const Cheptel: React.FC = () => {
     if (window.confirm(t('cheptel.confirmDelete'))) { await deleteCheptel(editingId); resetForm(); load(); }
   };
 
-  const handleRdv = async () => {
-    if (!rdvAnimal || !rdvDate) { alert(t('cheptel.selectAnimalDate')); return; }
-    const selected = malades[parseInt(rdvAnimal)];
-    if (!selected) return;
-    try {
-      await prendreRdv({ animalId: selected.id, animalNom: selected.nom, dateRdv: rdvDate, motif: rdvMotif, statut: 'En attente' });
-      await sendRdvEmail({
-        animalNom: selected.nom,
-        typeAnimal: selected.typeAnimal,
-        maladie: selected.maladie,
-        dateRdv: rdvDate,
-        motif: rdvMotif,
-      });
-      alert('RDV enregistré ! Un email de confirmation a été envoyé.');
-      setRdvAnimal(''); setRdvDate(''); setRdvMotif('');
-      load();
-    } catch (err) { console.error(err); }
-  };
 
   const ipt: React.CSSProperties = {
     padding: '10px 14px', borderRadius: 6, border: '1.5px solid #bdc3c7', fontSize: 15,
@@ -307,14 +292,36 @@ const Cheptel: React.FC = () => {
                           <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 'bold', color: '#2c3e50', width: 150 }}>{t('cheptel.nom')}</th>
                           <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 'bold', color: '#2c3e50', width: 100 }}>{t('cheptel.type')}</th>
                           <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 'bold', color: '#2c3e50' }}>{t('cheptel.maladie')}</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 'bold', color: '#2c3e50', width: 130 }}>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {malades.map((m, i) => (
-                          <tr key={m.id} onClick={() => setRdvAnimal(String(i))} style={{ borderBottom: '1px solid #dee2e6', cursor: 'pointer', backgroundColor: rdvAnimal === String(i) ? '#eef2f7' : 'transparent' }}>
+                        {malades.map((m) => (
+                          <tr key={m.id} style={{ borderBottom: '1px solid #dee2e6' }}>
                             <td style={{ padding: '8px 12px', fontWeight: 500 }}>{m.nom}</td>
                             <td style={{ padding: '8px 12px' }}>{m.typeAnimal}</td>
                             <td style={{ padding: '8px 12px', color: '#e74c3c' }}>{m.maladie || '-'}</td>
+                            <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                              <button
+                                onClick={() => {
+                                  setSelectedAnimalForRdv(m);
+                                  setShowRdvModal(true);
+                                }}
+                                style={{
+                                  backgroundColor: '#27ae60',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: 4,
+                                  padding: '6px 12px',
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'background-color 0.2s'
+                                }}
+                              >
+                                Prendre RDV
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -326,31 +333,81 @@ const Cheptel: React.FC = () => {
                 <VetAssistant onRequestRdv={() => setShowMalades(true)} />
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '2 1 200px', minWidth: 180 }}>
-                <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.animal')}</label>
-                <select value={rdvAnimal} onChange={(e) => setRdvAnimal(e.target.value)} style={{ ...ipt, width: '100%' }}>
-                  <option value="">{t('cheptel.selectPlaceholder')}</option>
-                  {malades.map((m, i) => <option key={m.id} value={i}>{m.nom} - {m.typeAnimal}{m.maladie ? ` (${m.maladie})` : ''}</option>)}
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 140px', minWidth: 130 }}>
-                <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.dateRDV')}</label>
-                <input type="date" value={rdvDate} onChange={(e) => setRdvDate(e.target.value)} style={{ ...ipt, width: '100%' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '2 1 180px', minWidth: 150 }}>
-                <label style={{ fontSize: 12, color: '#7f8c8d', fontWeight: 600 }}>{t('cheptel.motif')}</label>
-                <input placeholder={t('cheptel.motif')} value={rdvMotif} onChange={(e) => setRdvMotif(e.target.value)} style={{ ...ipt, width: '100%' }} />
-              </div>
-              <button onClick={handleRdv} style={{ backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: 6, padding: '10px 20px', cursor: 'pointer', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.25s', whiteSpace: 'nowrap' }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#2980b9'; e.currentTarget.style.transform = 'scale(1.04)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#3498db'; e.currentTarget.style.transform = 'scale(1)'; }}>
-                <Calendar size={16} /> {t('cheptel.prendreRDV')}
-              </button>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 15, padding: '10px 14px', backgroundColor: '#f8f9fa', borderRadius: 6, border: '1px dashed #bdc3c7' }}>
+              <span style={{ fontSize: 14, color: '#7f8c8d' }}>
+                💡 Cliquez sur le bouton <strong>"Prendre RDV"</strong> à côté de n'importe quel animal malade pour programmer une consultation avec l'un de nos vétérinaires partenaires.
+              </span>
             </div>
           </div>
         )}
       </div>
+      {/* RDV History Section */}
+      <div style={{ backgroundColor: 'white', borderRadius: 10, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginTop: 4 }}>
+        <div onClick={() => setShowRdvHistory(!showRdvHistory)}
+          style={{ padding: '14px 20px', backgroundColor: '#f8f9fa', cursor: 'pointer', fontWeight: 700, fontSize: 15,
+            borderBottom: showRdvHistory ? '1px solid #dee2e6' : 'none', userSelect: 'none',
+            display: 'flex', alignItems: 'center', gap: 8, color: '#2c3e50' }}>
+          <Calendar size={18} color='#3498db' />
+          {t('cheptel.mesRdv') || 'Mes Rendez-vous vétérinaires'}
+          <span style={{ marginLeft: 6, backgroundColor: '#d6eaf8', color: '#3498db', fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
+            {rdvHistory.length}
+          </span>
+          <span style={{ marginLeft: 'auto', fontSize: 12, color: '#7f8c8d' }}>{showRdvHistory ? '▲' : '▼'}</span>
+        </div>
+        {showRdvHistory && (
+          <div style={{ padding: '0 0 8px' }}>
+            {rdvHistory.length === 0 ? (
+              <p style={{ padding: '20px', textAlign: 'center', color: '#95a5a6', fontSize: 14 }}>Aucun rendez-vous enregistré</p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f8f9fa' }}>
+                    {['Animal', 'Vétérinaire', 'Date', 'Motif', 'Statut'].map(h => (
+                      <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#2c3e50', borderBottom: '2px solid #dee2e6' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rdvHistory.map((r: any, i: number) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #ecf0f1' }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <td style={{ padding: '10px 14px', fontWeight: 600 }}>{r.animal_nom} <span style={{ color: '#7f8c8d', fontWeight: 400 }}>({r.animal_type})</span></td>
+                      <td style={{ padding: '10px 14px' }}>{r.veterinaire_nom}</td>
+                      <td style={{ padding: '10px 14px' }}>{r.date_rdv}</td>
+                      <td style={{ padding: '10px 14px', color: '#7f8c8d' }}>{r.motif?.substring(0, 35)}{r.motif?.length > 35 ? '...' : ''}</td>
+                      <td style={{ padding: '10px 14px' }}>
+                        <span style={{
+                          padding: '3px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                          backgroundColor: r.statut === 'Confirme' ? '#d5f5e3' : r.statut === 'Annule' ? '#fadbd8' : '#fef9e7',
+                          color: r.statut === 'Confirme' ? '#27ae60' : r.statut === 'Annule' ? '#e74c3c' : '#f39c12',
+                        }}>{r.statut}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
+      {showRdvModal && selectedAnimalForRdv && (
+        <RDVModal
+          animal={{
+            id: selectedAnimalForRdv.id,
+            nom: selectedAnimalForRdv.nom,
+            typeAnimal: selectedAnimalForRdv.typeAnimal,
+            maladie: selectedAnimalForRdv.maladie,
+          }}
+          onClose={() => {
+            setShowRdvModal(false);
+            setSelectedAnimalForRdv(null);
+          }}
+          onSuccess={() => {
+            load();
+          }}
+        />
+      )}
     </div>
   );
 };

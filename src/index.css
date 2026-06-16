@@ -95,3 +95,61 @@ body.dark [style*="zIndex: 9999"] span {
   color: #f0f4f8 !important;
   background-color: transparent !important;
 }
+/* ===== RTL - Arabic Support ===== */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right !important;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] select,
+[dir="rtl"] textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="rtl"] input::placeholder {
+  text-align: right;
+}
+
+/* Flex rows flip in RTL */
+[dir="rtl"] .rtl-flip {
+  flex-direction: row-reverse;
+}
+
+/* Fix padding/margin for RTL */
+[dir="rtl"] [style*="paddingLeft"],
+[dir="rtl"] [style*="padding-left"] {
+  padding-left: 0 !important;
+}
+
+[dir="rtl"] [style*="marginLeft"],
+[dir="rtl"] [style*="margin-left"] {
+  margin-left: 0 !important;
+}
+
+/* Navbar RTL */
+[dir="rtl"] nav,
+[dir="rtl"] .navbar {
+  flex-direction: row-reverse;
+}
+
+/* Forms in RTL */
+[dir="rtl"] label {
+  display: block;
+  text-align: right;
+}
+
+/* Notification bell position fix in RTL */
+[dir="rtl"] [style*="right: 16"] {
+  right: auto !important;
+  left: 16px !important;
+}

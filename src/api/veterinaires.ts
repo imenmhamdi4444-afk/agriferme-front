@@ -8,6 +8,7 @@ export interface Veterinaire {
   specialite: string;
   ville: string;
   statut: string;
+  commission_montant: number; // agreed flat amount per referral (DT), 0 = not yet negotiated
 }
 
 export const getVeterinaires = async (ville?: string, specialite?: string) => {
@@ -25,14 +26,14 @@ export const getAllVeterinaires = async () => {
   return { data: await res.json(), status: res.status };
 };
 
-export const createVeterinaire = async (data: Partial<Veterinaire>) => {
+export const createVeterinaire = async (data: any) => {
   const res = await fetch(`${API_URL}/veterinaires`, {
     method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(data),
   });
   return { data: await res.json(), status: res.status };
 };
 
-export const updateVeterinaire = async (id: number, data: Partial<Veterinaire>) => {
+export const updateVeterinaire = async (id: number, data: any) => {
   const res = await fetch(`${API_URL}/veterinaires/${id}`, {
     method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(data),
   });

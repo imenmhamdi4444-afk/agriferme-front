@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import { useTranslation } from '../context/LanguageContext';
+import React, { useState, useEffect } from 'react';
 import { getVeterinaires, createRendezVous, getRendezVous, Veterinaire } from '../api/veterinaires';
 import { sendRdvEmail } from '../api/emailjs';
 import { useToast } from '../hooks/useToast';
@@ -7,6 +8,7 @@ import Spinner from './Spinner';
 import { Stethoscope, MapPin, Phone, Mail, Calendar, Clock, CheckCircle, Search, X } from 'lucide-react';
 
 const RendezVous: React.FC = () => {
+  const { t } = useTranslation();
   const { toast, showToast, hideToast } = useToast();
   const [vets, setVets] = useState<Veterinaire[]>([]);
   const [filteredVets, setFilteredVets] = useState<Veterinaire[]>([]);
@@ -109,17 +111,17 @@ const RendezVous: React.FC = () => {
               <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
                 <div style={{ flex: 1, position: 'relative' }}>
                   <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#7f8c8d' }} />
-                  <input placeholder="Ville..." value={searchVille} onChange={e => setSearchVille(e.target.value)} style={{ ...ipt, paddingLeft: 30 }} />
+                  <input placeholder={t("vet.city") + "..."} value={searchVille} onChange={e => setSearchVille(e.target.value)} style={{ ...ipt, paddingLeft: 30 }} />
                 </div>
                 <div style={{ flex: 1, position: 'relative' }}>
                   <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#7f8c8d' }} />
-                  <input placeholder="Spécialité..." value={searchSpecialite} onChange={e => setSearchSpecialite(e.target.value)} style={{ ...ipt, paddingLeft: 30 }} />
+                  <input placeholder={t("vet.speciality") + "..."} value={searchSpecialite} onChange={e => setSearchSpecialite(e.target.value)} style={{ ...ipt, paddingLeft: 30 }} />
                 </div>
               </div>
 
               <div style={{ maxHeight: 380, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {filteredVets.length === 0 ? (
-                  <p style={{ color: '#7f8c8d', textAlign: 'center', padding: 20 }}>Aucun vétérinaire trouvé</p>
+                  <p style={{ color: '#7f8c8d', textAlign: 'center', padding: 20 }}>{t("vet.none")}</p>
                 ) : filteredVets.map(vet => (
                   <div key={vet.id} onClick={() => setSelectedVet(selectedVet?.id === vet.id ? null : vet)}
                     style={{
@@ -164,11 +166,11 @@ const RendezVous: React.FC = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div>
                       <label style={{ fontSize: 13, fontWeight: 600, color: '#7f8c8d', display: 'block', marginBottom: 5 }}>Nom de l'animal *</label>
-                      <input value={animalNom} onChange={e => setAnimalNom(e.target.value)} placeholder="Ex: Vache 01" style={ipt} />
+                      <input value={animalNom} onChange={e => setAnimalNom(e.target.value)} placeholder={t("vet.animalName")} style={ipt} />
                     </div>
                     <div>
                       <label style={{ fontSize: 13, fontWeight: 600, color: '#7f8c8d', display: 'block', marginBottom: 5 }}>Type d'animal</label>
-                      <input value={animalType} onChange={e => setAnimalType(e.target.value)} placeholder="Ex: Vache, Mouton..." style={ipt} />
+                      <input value={animalType} onChange={e => setAnimalType(e.target.value)} placeholder={t("vet.animalType")} style={ipt} />
                     </div>
                   </div>
                   <div>
@@ -177,7 +179,7 @@ const RendezVous: React.FC = () => {
                   </div>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 600, color: '#7f8c8d', display: 'block', marginBottom: 5 }}>Motif / Symptômes *</label>
-                    <textarea value={motif} onChange={e => setMotif(e.target.value)} placeholder="Décrivez les symptômes de l'animal..." rows={4}
+                    <textarea value={motif} onChange={e => setMotif(e.target.value)} placeholder={t("vet.motifPlaceholder")} rows={4}
                       style={{ ...ipt, resize: 'vertical' as const }} />
                   </div>
 
@@ -198,7 +200,7 @@ const RendezVous: React.FC = () => {
                   }}
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1e8449'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = '#27ae60'}>
-                    <Calendar size={18} /> {booking ? 'Envoi en cours...' : 'Confirmer le RDV'}
+                    <Calendar size={18} /> {booking ? t('vet.sending') : t('vet.confirm')}
                   </button>
                 </div>
               )}
@@ -211,7 +213,7 @@ const RendezVous: React.FC = () => {
         <div style={card}>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: '#2c3e50', margin: '0 0 16px' }}>Mes rendez-vous</h3>
           {rdvHistory.length === 0 ? (
-            <p style={{ color: '#7f8c8d', textAlign: 'center', padding: 30 }}>Aucun rendez-vous enregistré</p>
+            <p style={{ color: '#7f8c8d', textAlign: 'center', padding: 30 }}>{t("vet.noRdv")}</p>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>

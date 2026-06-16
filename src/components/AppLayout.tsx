@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../context/LanguageContext';
 import { useDarkMode } from '../context/DarkModeContext';
-import { Bell, AlertTriangle, AlertCircle, LogOut, LayoutDashboard, Sprout, Wheat, Package, Beef, BarChart3, Shield, User, Menu, X, Globe, Moon, Sun as SunIcon } from 'lucide-react';
+import { Bell, AlertTriangle, AlertCircle, LogOut, LayoutDashboard, Sprout, Wheat, Package, Beef, BarChart3, Shield, User, Menu, X, Globe, Moon, Sun as SunIcon, Calendar } from 'lucide-react';
 import { LANGUAGES } from '../i18n/translations';
 import { getStock } from '../api/stock';
 import { getCheptels } from '../api/cheptel';
