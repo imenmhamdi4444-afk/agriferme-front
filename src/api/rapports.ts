@@ -29,9 +29,27 @@ export const getRevenus = async () => {
 };
 
 export const getAllRevenus = async () => {
-  const res = await fetch(`${API_URL}/revenus`, { headers: getAuthHeaders() });
-  const data = await res.json();
-  return { data: data.map((r: any) => ({ source: r.source, montant: parseFloat(r.montant) || 0, date: r.date || '', description: r.description || '' })), status: res.status };
+  // Auto-build revenue list from cheptels (sales) + stocks (expenses)
+  const [cheptelRes, stockRes] = await Promise.all([
+    fetch(API_URL + '/cheptels', { headers: getAuthHeaders() }),
+    fetch(API_URL + '/stocks', { headers: getAuthHeaders() }),
+  ]);
+  const cheptels = await cheptelRes.json();
+  const stocks = await stockRes.json();
+  const rows: any[] = [];
+  if (Array.isArray(cheptels)) {
+    cheptels.forEach((c: any) => {
+      const total = parseFloat(c.prix_total || c.prixTotal) || 0;
+      if (total > 0) rows.push({ source: 'Cheptel', montant: total, date: new Date().toISOString().split('T')[0], description: c.nom || '' });
+    });
+  }
+  if (Array.isArray(stocks)) {
+    stocks.forEach((s: any) => {
+      const dep = parseFloat(s.depense) || 0;
+      if (dep > 0) rows.push({ source: 'Stock', montant: dep, date: new Date().toISOString().split('T')[0], description: s.nom_produit || s.nomProduit || '' });
+    });
+  }
+  return { data: rows, status: 200 };
 };
 
 export const createRevenu = async (data: any) => {

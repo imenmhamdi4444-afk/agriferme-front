@@ -20,7 +20,7 @@ const DashboardAdmin: React.FC = () => {
   const [nomComplet, setNomComplet] = useState('');
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
-  const [role, setRole] = useState('AGRICULTEUR');
+  const [role, setRole] = useState('USER');
   const [telephone, setTelephone] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -193,7 +193,7 @@ const DashboardAdmin: React.FC = () => {
     setNomComplet('');
     setEmail('');
     setMotDePasse('');
-    setRole('AGRICULTEUR');
+    setRole('USER');
     setTelephone('');
   };
 
@@ -320,7 +320,7 @@ const DashboardAdmin: React.FC = () => {
                 style={{ padding: '7px 10px', borderRadius: 5, border: '1px solid #bdc3c7', fontSize: 13, outline: 'none', height: 36, width: 150 }} />
               <select value={role} onChange={(e) => setRole(e.target.value)}
                 style={{ padding: '7px 10px', borderRadius: 5, border: '1px solid #bdc3c7', fontSize: 13, outline: 'none', height: 36, width: 120, backgroundColor: 'white', cursor: 'pointer' }}>
-                <option value="AGRICULTEUR">{t('app.agriculteur')}</option>
+                <option value="USER">{t('app.agriculteur')}</option>
                 <option value="ADMIN">{t('app.admin')}</option>
               </select>
               <input placeholder={t('admin.telephone')} value={telephone}
@@ -389,7 +389,7 @@ const DashboardAdmin: React.FC = () => {
                       <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>{u.id}</td>
                       <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>{u.nomComplet}</td>
                       <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>{u.email}</td>
-                      <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>{u.role}</td>
+                      <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>{u.role === 'ADMIN' ? t('app.admin') : t('app.agriculteur')}</td>
                       <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>{u.telephone}</td>
                       <td style={{ padding: '8px 8px', verticalAlign: 'middle' }}>
                         <span style={{

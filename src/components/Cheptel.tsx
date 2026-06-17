@@ -59,9 +59,10 @@ const Cheptel: React.FC = () => {
   const load = async () => {
     setLoading(true);
     try {
-      const [aRes, mRes] = await Promise.all([getCheptel(), getAnimauxMalades()]);
+      const [aRes, mRes, rdvRes] = await Promise.all([getCheptel(), getAnimauxMalades(), getRendezVous()]);
       setAnimaux(aRes.data);
       setMalades(mRes.data);
+      setRdvHistory(Array.isArray(rdvRes.data) ? rdvRes.data : []);
     } catch (err) { showToast('Erreur de chargement', 'error'); } finally { setLoading(false); }
   };
 
@@ -330,7 +331,16 @@ const Cheptel: React.FC = () => {
                 </div>
               </div>
               <div style={{ flex: '1 1 350px', minWidth: 280 }}>
-                <VetAssistant onRequestRdv={() => setShowMalades(true)} />
+                <VetAssistant onRequestRdv={() => {
+                  // Open RDV modal with first sick animal if available
+                  const firstSick = malades[0];
+                  if (firstSick) {
+                    setSelectedAnimalForRdv(firstSick);
+                    setShowRdvModal(true);
+                  } else {
+                    setShowMalades(true);
+                  }
+                }} />
               </div>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 15, padding: '10px 14px', backgroundColor: '#f8f9fa', borderRadius: 6, border: '1px dashed #bdc3c7' }}>
